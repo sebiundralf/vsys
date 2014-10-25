@@ -1,4 +1,5 @@
 #Makefile für vsys Server & Client
+#Files erzeugen und löschen
 
 SNAME = server
 CNAME = client
