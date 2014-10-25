@@ -22,3 +22,6 @@ ${CNAME}_main.o : ${CNAME}_main.c
 
 clean: 
 	rm -f vsys_${SNAME} vsys_${CNAME} ${SNAME}_main.o ${CNAME}_main.o
+
+
+#(nicht vergessen neue Datein beim erstellen in das Makefile einzubinden!)
