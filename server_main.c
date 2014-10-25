@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
             if (new_socket > 0)
             {
                 printf ("Client connected from %s:%d...\n", inet_ntoa (cliaddress.sin_addr),ntohs(cliaddress.sin_port));
-                strcpy(buffer,"Welcome to myserver, Please enter your command:\n");
+                strcpy(buffer,"Welcome to vsys_server, Please enter your command:\n");
                 send(new_socket, buffer, strlen(buffer),0);
             }
             do
@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
                     return EXIT_FAILURE;
                 }
             }
-            while (strncmp (buffer, "quit", 4)  != 0);
+            while (strncasecmp (buffer, "QUIT", 4)  != 0);
             close (new_socket);
         }
         close (create_socket);
