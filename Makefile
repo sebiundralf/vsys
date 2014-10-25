@@ -19,3 +19,5 @@ ${CNAME} : ${CNAME}_main.o
 ${CNAME}_main.o : ${CNAME}_main.c
 	gcc ${CFLAGS} -c ${CNAME}_main.c
 
+clean: 
+	rm -f vsys_${SNAME} vsys_${CNAME} ${SNAME}_main.o ${CNAME}_main.o
