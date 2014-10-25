@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #define BUF 1024
+char *s_gets(char *str, int n);
 
 void print_usage()
 {
@@ -84,6 +85,8 @@ int main(int argc, char* argv[])
         char buffer[BUF];
         struct sockaddr_in address;
         int size;
+        char* command;
+        char* file;
 
         if ((create_socket = socket (AF_INET, SOCK_STREAM, 0)) == -1)
         {
@@ -94,7 +97,7 @@ int main(int argc, char* argv[])
         memset(&address,0,sizeof(address));
         address.sin_family = AF_INET;
         address.sin_port = htons (vport);
-        inet_aton (vip, &address.sin_addr);
+        inet_aton(vip, &address.sin_addr);
 
         if (connect ( create_socket, (struct sockaddr *) &address, sizeof (address)) == 0)
         {
@@ -114,14 +117,79 @@ int main(int argc, char* argv[])
 
         do
         {
-            printf ("Send message: ");
-            fgets (buffer, BUF, stdin);
+            printf ("Send command: ");
+            s_gets(buffer, BUF);
+           // char* ptr;
+           char buf2[BUF];
+           strcpy(buf2,buffer);
+
+            command = strtok(buf2, " ");
+            file = strtok(NULL, " ");
+
+           // printf("Command = %s\n", command);
+           // if(file!=NULL)
+                //printf("File = %s\n", file);
+
+            if(!strcasecmp(command, "LIST")){
+
+                printf("List wird ausgeführt\n");
+
+            }
+            else if(!strcasecmp(command, "GET")){
+
+                printf("Get wird ausgeführt\n");
+
+            }
+            else if(!strcasecmp(command, "SEND")){
+                printf("Send wird ausgeführt\n");
+
+
+            }
+            else if(!strcasecmp(command, "QUIT")){
+                printf("Client wird beendet\n");
+
+            }
+            else{
+                printf("Unknown command: %s\n", command);
+
+            }
+
+
+
+
+
+
+
             send(create_socket, buffer, strlen (buffer), 0);
         }
-        while (strcmp (buffer, "quit\n") != 0);
+        while (strcasecmp (command, "QUIT") != 0);
         close (create_socket);
 
     }
     /* Ende Verbindung */
     return 0;
+}
+
+char *s_gets(char *str, int n)
+{
+
+    char *ret_val;
+    int i=0;
+    ret_val=fgets(str, n, stdin);
+    if(ret_val)
+    {
+
+        while (str[i] != '\n' && str[i] !='\0')
+            i++;
+
+        if(str[i] == '\n')
+            str[i]='\0';
+        else
+            while(getchar()!='\n')
+                continue;
+
+    }
+
+    return ret_val;
+
 }
