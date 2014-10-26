@@ -62,7 +62,7 @@ void s_list (char* dir, int socket)
 
     }else{
       perror ("Could not open directory");
-      return EXIT_FAILURE;
+      return;
     }
 
     if(strlen(buffer) != 0){
@@ -73,7 +73,7 @@ void s_list (char* dir, int socket)
     write(socket, buffer, BUF);
     closedir(d);
 
-   printf("sending list successful\n");
+   printf("Sending list successful\n");
 
 }
 
