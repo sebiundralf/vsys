@@ -1,10 +1,15 @@
 #include "server.h"
 
+#ifndef PATH_MAX
+#define PATH_MAX 255
+#endif
+
+void checkdir(char* dir);
 
 /* Funktion print_usage() zur Ausgabe der usage Meldung */
 void print_usage()
 {
-    fprintf(stderr,"\nUsage: vsys_server -p PORT -d DIRECTORY\n\n");
+    fprintf(stderr,"\nUsage: vsys_server -p PORT -d DIRECTORY (Absolute) \n\n");
     exit(EXIT_FAILURE);
 }
 
@@ -71,6 +76,12 @@ int main(int argc, char* argv[])
 
         /* ENDE GETOPT*/
     }
+
+
+    /* Überprüfen ob korrektes Verzeichnis angegeben wurde */
+
+    checkdir(vdir);
+
 
 
     /* ANFANG Verbindungsaufbau */
@@ -159,7 +170,7 @@ int main(int argc, char* argv[])
                     return EXIT_FAILURE;
                 }
             }
-            while (strncasecmp (buffer, "QUIT")  != 0);
+            while (strcasecmp (buffer, "QUIT")  != 0);
             close (new_socket);
         }
         close (create_socket);
@@ -169,4 +180,51 @@ int main(int argc, char* argv[])
 
 
     return 0;
+}
+
+
+void checkdir(char* dir)
+{
+    DIR* dirp;
+    char cwd[PATH_MAX];
+
+    /* Wird aktiviert wenn relative Pfadangabe möglich gemacht wird */
+    {
+/*
+    if(dir[0] != '/'){
+        getcwd(cwd,PATH_MAX);
+
+        char* token1 = NULL;
+        char* token2 = NULL;
+        char abPath[PATH_MAX] = "";
+
+        token2 = strtok(dir,"/");
+        token1 = strtok(cwd,"/");
+
+        while(token1 != NULL){
+            strcat(abPath,"/");
+            strcat(abPath,token1);
+
+            if(strcmp(token1,token2) == 0){
+                break;
+            }
+            token1 = strtok(NULL,"/");
+        }
+        dir = abPath;
+    }
+*/
+}
+
+ //   printf("\nPfad: %s\n\n", dir);
+
+    if((dirp = opendir(dir)) == NULL){
+        perror("Failed to open directory: ");
+        printf("%s\n", dir);
+        print_usage();
+        return;
+    }
+
+
+    closedir(dirp);
+
 }
