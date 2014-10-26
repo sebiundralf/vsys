@@ -133,35 +133,27 @@ int main(int argc, char* argv[])
             {
                 if(!strcasecmp(command, "LIST"))
                 {
-
                     printf("List wird ausgeführt\n");
                     c_list(create_socket);
-
                 }
                 else if(!strcasecmp(command, "GET"))
                 {
-
                     printf("Get wird ausgeführt\n");
                     c_get(create_socket, file);
-
                 }
                 else if(!strcasecmp(command, "PUT"))
                 {
                     printf("Put wird ausgeführt\n");
                     c_put(create_socket, file);
-
-
                 }
                 else if(!strcasecmp(command, "QUIT"))
                 {
                     printf("Client wird beendet\n");
-
                 }
                 else
                 {
                     printf("Unknown command: %s\n", command);
                     error = 1;
-
                 }
             }
 

@@ -4,5 +4,4 @@ void s_get(char* dir, int socket)
 {
 
 
-
 }
