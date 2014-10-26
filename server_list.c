@@ -7,7 +7,7 @@ void s_list (char* dir, int socket)
     //ftw(dir, list, 1);
     DIR *d;
     struct dirent *entry;
-    char path[255];
+    char path[PATH_MAX];
     char buffer[BUF];
 
     memset(buffer, 0, sizeof(buffer));

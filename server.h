@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <ftw.h>
 #define BUF 1024
+#define PATH_MAX 255
 
 void s_list (char* dir, int socket);
 void s_get(char* dir, int socket);
