@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <ftw.h>
 #define BUF 1024
 
 void s_list (char* dir, int socket);
