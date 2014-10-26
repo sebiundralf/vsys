@@ -1,14 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <getopt.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#define BUF 1024
+#include "client.h"
+
+
 char *s_gets(char *str, int n);
 
 void print_usage()
@@ -23,7 +15,7 @@ int main(int argc, char* argv[])
 
     char* vip = NULL; //IP-Adresse des Servers, Variable muss später freigegeben werden
     int vport = -1; //Portnummer
-
+    int error = 0; //nur temorär verwendet zum debugging
 
     /* Start der GETOPT behandlung */
     {
@@ -79,7 +71,7 @@ int main(int argc, char* argv[])
         /* ENDE GETOPT */
     }
 
-    /* Verbindungsaufbau */
+    /* Kommunikation mit server */
     {
         int create_socket;
         char buffer[BUF];
@@ -88,79 +80,97 @@ int main(int argc, char* argv[])
         char* command;
         char* file;
 
-        if ((create_socket = socket (AF_INET, SOCK_STREAM, 0)) == -1)
+        /* Socket erstellen */
         {
-            perror("Socket error");
-            return EXIT_FAILURE;
-        }
-
-        memset(&address,0,sizeof(address));
-        address.sin_family = AF_INET;
-        address.sin_port = htons (vport);
-        inet_aton(vip, &address.sin_addr);
-
-        if (connect ( create_socket, (struct sockaddr *) &address, sizeof (address)) == 0)
-        {
-            printf ("Connection with server (%s) established\n", inet_ntoa (address.sin_addr));
-            size=recv(create_socket,buffer,BUF-1, 0);
-            if (size>0)
+            if ((create_socket = socket (AF_INET, SOCK_STREAM, 0)) == -1)
             {
-                buffer[size]= '\0';
-                printf("%s",buffer);
+                perror("Socket error");
+                return EXIT_FAILURE;
             }
+
+            memset(&address,0,sizeof(address));
+            address.sin_family = AF_INET;
+            address.sin_port = htons (vport);
+            inet_aton(vip, &address.sin_addr);
         }
-        else
+        /* connect */
         {
-            perror("Connect error - no server available");
-            return EXIT_FAILURE;
+            if (connect ( create_socket, (struct sockaddr *) &address, sizeof (address)) == 0)
+            {
+                printf ("Connection with server (%s) established\n", inet_ntoa (address.sin_addr));
+                size=recv(create_socket,buffer,BUF-1, 0);
+                if (size>0)
+                {
+                    buffer[size]= '\0';
+                    printf("%s",buffer);
+                }
+            }
+            else
+            {
+                perror("Connect error - no server available");
+                return EXIT_FAILURE;
+            }
         }
 
         do
         {
             printf ("Send command: ");
             s_gets(buffer, BUF);
-           // char* ptr;
-           char buf2[BUF];
-           strcpy(buf2,buffer);
 
-            command = strtok(buf2, " ");
-            file = strtok(NULL, " ");
+            /* String trennen */
+            {
+                char buf2[BUF];
+                strcpy(buf2,buffer);
 
-           // printf("Command = %s\n", command);
-           // if(file!=NULL)
-                //printf("File = %s\n", file);
-
-            if(!strcasecmp(command, "LIST")){
-
-                printf("List wird ausgeführt\n");
-
+                command = strtok(buf2, " ");
+                file = strtok(NULL, " ");
             }
-            else if(!strcasecmp(command, "GET")){
+            // printf("Command = %s\n", command);
+            // if(file!=NULL)
+            //printf("File = %s\n", file);
 
-                printf("Get wird ausgeführt\n");
+            /* Befehl ausführen */
+            {
+                if(!strcasecmp(command, "LIST"))
+                {
 
+                    printf("List wird ausgeführt\n");
+                    c_list(create_socket);
+
+                }
+                else if(!strcasecmp(command, "GET"))
+                {
+
+                    printf("Get wird ausgeführt\n");
+                    c_get(create_socket, file);
+
+                }
+                else if(!strcasecmp(command, "PUT"))
+                {
+                    printf("Put wird ausgeführt\n");
+                    c_put(create_socket, file);
+
+
+                }
+                else if(!strcasecmp(command, "QUIT"))
+                {
+                    printf("Client wird beendet\n");
+
+                }
+                else
+                {
+                    printf("Unknown command: %s\n", command);
+                    error = 1;
+
+                }
             }
-            else if(!strcasecmp(command, "SEND")){
-                printf("Send wird ausgeführt\n");
-
-
-            }
-            else if(!strcasecmp(command, "QUIT")){
-                printf("Client wird beendet\n");
-
-            }
-            else{
-                printf("Unknown command: %s\n", command);
-
-            }
 
 
 
+            if(!error)
+                send(create_socket, command, strlen (command), 0);
 
-
-
-
-            send(create_socket, buffer, strlen (buffer), 0);
+            error = 0;
         }
         while (strcasecmp (command, "QUIT") != 0);
         close (create_socket);

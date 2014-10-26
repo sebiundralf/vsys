@@ -1,14 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <getopt.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#define BUF 1024
+#include "server.h"
+
 
 /* Funktion print_usage() zur Ausgabe der usage Meldung */
 void print_usage()
@@ -122,7 +113,40 @@ int main(int argc, char* argv[])
                 if( size > 0)
                 {
                     buffer[size] = '\0';
-                    printf ("Message received: %s\n", buffer);
+                    //      printf ("Message received: %s\n", buffer);
+                    /* Befehl auslesen */
+                    {
+                        if(!strcasecmp(buffer, "LIST"))
+                        {
+
+                            printf("List wird ausgeführt\n");
+                            s_list(vdir, new_socket);
+
+                        }
+                        else if(!strcasecmp(buffer, "GET"))
+                        {
+
+                            printf("Get wird ausgeführt\n");
+                            s_get(vdir, new_socket);
+
+                        }
+                        else if(!strcasecmp(buffer, "PUT"))
+                        {
+                            printf("Put wird ausgeführt\n");
+                            s_put(vdir, new_socket);
+
+
+                        }
+                        else if(!strcasecmp(buffer, "QUIT"))
+                        {
+                            printf("Client quit\n");
+
+                        }
+                        else
+                        {
+                            printf("The fuck dude? We shouldn't be here..");
+                        }
+                    }
                 }
                 else if (size == 0)
                 {
@@ -135,7 +159,7 @@ int main(int argc, char* argv[])
                     return EXIT_FAILURE;
                 }
             }
-            while (strncasecmp (buffer, "QUIT", 4)  != 0);
+            while (strncasecmp (buffer, "QUIT")  != 0);
             close (new_socket);
         }
         close (create_socket);
