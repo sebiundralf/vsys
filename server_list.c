@@ -2,6 +2,7 @@
 
 //int list(const char*, const struct stat*, int type);
 
+
 void s_list (char* dir, int socket)
 {
     //ftw(dir, list, 1);

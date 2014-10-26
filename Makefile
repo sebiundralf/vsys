@@ -3,7 +3,7 @@
 
 SNAME = server
 CNAME = client
-SFLAGS = -g -Wall -O -std=c99 -pedantic
+SFLAGS = -g -Wall -O -std=c99 -pedantic -D_BSD_SOURCE
 CFLAGS = ${SFLAGS}
 
 all : ${SNAME} ${CNAME}
