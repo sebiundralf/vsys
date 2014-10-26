@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
                 if( size > 0)
                 {
                     buffer[size] = '\0';
-                    //      printf ("Message received: %s\n", buffer);
+                         printf ("Message received: %s\n", buffer);
                     /* Befehl auslesen */
                     {
                         if(!strcasecmp(buffer, "LIST"))

@@ -13,8 +13,11 @@
 #include <arpa/inet.h>
 #include <dirent.h>
 #include <unistd.h>
+
 #define BUF 1024
 
+
+#define PATH_MAX 255
 
 void c_list (int socket);
 void c_get(int socket, char* file);
