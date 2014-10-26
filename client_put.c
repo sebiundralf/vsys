@@ -40,7 +40,7 @@ void c_put(int socket, char* file)
 
     if((fp = fopen(path, "rb")) == NULL)
     {
-        printf("Couldn't open file \"%s\"\n",path);
+        printf("Couldn't open file \"%s\"\n",file);
         return;
 
     }
@@ -58,11 +58,25 @@ void c_put(int socket, char* file)
     free(temp);
 
     int block_sz;
-    /*
+
     while(!feof(fp)){
 
-        mem
-    */
+        memset(buffer, '\0', sizeof(buffer));
+        if((bock_sz = fread(buffer,sizeof(char), STR_SIZE, fp))<0) {
+            printf("Error: couldn't read file\n");
+            return;
+
+        }
+        if(write(socket, buffer, block_sz)<0){
+            fprintf(stderr, "Error: Coudn't send file %s.\n", file);
+            return;
+        }
+    }
+
+    printf("File %s was sent to server!\n", file);
+
+
+
 
     fclose(fp);
     closedir(path2);
