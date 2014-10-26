@@ -8,7 +8,7 @@ void s_put(char* dir, int socket)
 
     memset(buffer,'\0',sizeof(buffer));
 
-    fsize = read(socket, buffer, STR_SIZE);
+    fsize = read(socket, buffer, BUF);
 
     long s = strtol(buffer,(char**)NULL,30);
 

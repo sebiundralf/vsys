@@ -134,8 +134,16 @@ int main(int argc, char* argv[])
             {
                 if(!strcasecmp(command, "LIST"))
                 {
-                    printf("List wird ausgeführt\n");
-                    c_list(create_socket);
+                    printf("List wird ausgeführt\n\nListe:\n");
+                    send(create_socket, command, strlen (command), 0);
+                    do{
+                    read(create_socket,buffer, BUF);
+                    //buffer[BUF-1] = '\0';
+                    printf("%s",buffer);
+
+                    }while (strlen(buffer)!=0);
+                    printf("\n");
+
                 }
                 else if(!strcasecmp(command, "GET"))
                 {
@@ -160,10 +168,7 @@ int main(int argc, char* argv[])
 
 
 
-            if(!error)
-                send(create_socket, command, strlen (command), 0);
 
-            error = 0;
         }
         while (strcasecmp (command, "QUIT") != 0);
         close (create_socket);

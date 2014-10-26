@@ -69,8 +69,11 @@ void s_list (char* dir, int socket)
         write(socket, buffer, BUF);
         memset(buffer,0,sizeof(buffer));
     }
+
     write(socket, buffer, BUF);
     closedir(d);
+
+   printf("sending list successful\n");
 
 }
 

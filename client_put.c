@@ -62,7 +62,7 @@ void c_put(int socket, char* file)
     while(!feof(fp)){
 
         memset(buffer, '\0', sizeof(buffer));
-        if((bock_sz = fread(buffer,sizeof(char), STR_SIZE, fp))<0) {
+        if((block_sz = fread(buffer,sizeof(char), BUF, fp))<0) {
             printf("Error: couldn't read file\n");
             return;
 
