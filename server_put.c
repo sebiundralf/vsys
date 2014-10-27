@@ -4,19 +4,26 @@ void s_put(char* dir, int socket)
 {
 
     char buffer[BUF];
-    int fsize;
+    int fsize, statt;
 
     strcpy(buffer,"ok");
     write(socket,buffer,BUF);
     memset(buffer,'\0',sizeof(buffer));
 
-    fsize = read(socket, buffer, BUF);
+    do
+    {
+        statt = read(socket, &fsize, sizeof(int));
+    }
+    while(statt<0);
+
 
     if(strncmp(buffer,"Sending file failed",18) == 0)
         printf("%s \n",buffer);
     else
     {
-        long filesize = atol(buffer);
+        int filesize = fsize;
+        int fsizemsg = fsize;
+        fsize = 0;
         memset(buffer,'\0',sizeof(buffer));
 
 
@@ -48,7 +55,7 @@ void s_put(char* dir, int socket)
             strcat(path,"/");
 
         strcat(path,file_name);
-       // printf("Filename + path: %s\n", path);
+        // printf("Filename + path: %s\n", path);
         if((fp = fopen(path,"w"))==NULL)
         {
 
@@ -56,21 +63,69 @@ void s_put(char* dir, int socket)
             return;
         }
 
-        do
-        {
-            memset(buffer,'\0',sizeof(buffer));
-            fsize = recv(socket,buffer,BUF,0);
-            fwrite(buffer, sizeof(char),BUF,fp);
-            filesize -= (long) fsize;
+        struct timeval timeout = {10,0};
+
+        fd_set fds;
+        int buffer_fd;
+        /*
+                while (filesize>0)
+                {
+
+                    FD_ZERO(&fds);
+                    FD_SET(socket,&fds);
+
+                   buffer_fd= select(FD_SETSIZE,&fds,NULL,NULL,&timeout);
+                    buffer_fd = 1;
+
+                    if(buffer_fd < 0)
+                    {
+                        perror("bad file descriptor set.\n");
+                    }
+                    if(buffer_fd == 0)
+                    {
+                        perror("buffer read timeout expired\n");
+                    }
+
+                    int rs;
+                    int ws;
+                    if(buffer_fd >0)
+                    {
+                        do
+                        {
+                            rs = read(socket,buffer,BUF);
+
+
+                        }
+                        while(rs<0);
+
+
+                        memset(buffer,'\0',sizeof(buffer));
+                        fsize = recv(socket,buffer,BUF,0);
+
+                        ws = fwrite(buffer, 1,rs,fp);
+                        memset(buffer,'\0',sizeof(buffer));
+
+
+                        if(fsize != ws)
+                        {
+
+                            perror("error in read write\n");
+                            printf("fsize %d, ws %d\n",fsize,ws);
+                        }
+
+
+                        filesize -= fsize;
+                        break;
+                    }
 
 
 
-
-        }
-        while (filesize>0);
+                }
+        */
         fclose(fp);
 
-        printf("file put successful\n");
+        printf("Submit failed!\n");
+        //  printf("file put successful\nFilename: %s\nFilesize: %d B\n",file_name,fsize,fsizemsg);
 
     }
 

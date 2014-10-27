@@ -136,9 +136,8 @@ int main(int argc, char* argv[])
                         }
                         else if(!strcasecmp(buffer, "GET"))
                         {
-
                             printf("Get wird ausgeführt\n");
-                            s_get(vdir, new_socket);
+                            s_get(vdir, new_socket,"filename");
 
                         }
                         else if(!strcasecmp(buffer, "PUT"))
