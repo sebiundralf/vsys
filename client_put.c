@@ -35,7 +35,7 @@ void c_put(int socket, char* file)
     }
     strcat(path,file);
 
-  //  printf("%s\n", path);
+    //  printf("%s\n", path);
 
 
     if((fp = fopen(path, "rb")) == NULL)
@@ -57,22 +57,22 @@ void c_put(int socket, char* file)
 
     while(strcmp(buffer,"ok"));
 
-    struct stat st;
-    stat(path, &st);
 
-    char* temp = malloc(sizeof(char*));
-    memset(temp,'\0',sizeof(temp));
-    sprintf(temp,"%ld", (unsigned long) st.st_size);
+    int fsize;
 
-    // printf("%s", temp);
-    //  char * test = "tetst\n";
-    write(socket,temp,BUF);
-    free(temp);
+    fseek(fp,0,SEEK_END);
+    fsize=ftell(fp);
+    fseek(fp,0,SEEK_SET);
+
+    printf("File size: %i b\n", fsize);
+
+    write(socket,(void*)&fsize,sizeof(int));
 
 
     int block_sz;
     int errorf = 1;
     int fname_sent = 0;
+
     while(!feof(fp))
     {
         if(!fname_sent)
@@ -99,19 +99,28 @@ void c_put(int socket, char* file)
         }
 
         memset(buffer, '\0', sizeof(buffer));
-        if((block_sz = fread(buffer,sizeof(char), BUF, fp))<0)
+
+
+        if((block_sz = fread(buffer,1, sizeof(buffer)-1, fp))<0)
         {
             printf("Error: couldn't read file\n");
             return;
 
         }
-        if(send(socket, buffer, block_sz,0)<0)
+
+
+        int status;
+        do
         {
-            fprintf(stderr, "Error: Coudn't send file %s.\n", file);
-            return;
+            //status = write(socket, buffer, block_sz);
         }
+        while(status<0);
+
         errorf=0;
+        break;
     }
+
+
     if(errorf)
     {
         printf("Couldn't find file %s\n", file);
