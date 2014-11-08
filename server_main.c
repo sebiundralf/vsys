@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
                         else if(!strcasecmp(buffer, "GET"))
                         {
                             printf("Get wird ausgeführt\n");
-                            s_get(vdir, new_socket,"filename");
+                            s_get(vdir, new_socket);
 
                         }
                         else if(!strcasecmp(buffer, "PUT"))
@@ -185,11 +185,11 @@ int main(int argc, char* argv[])
 void checkdir(char* dir)
 {
     DIR* dirp;
-    char cwd[PATH_MAX];
+
 
     /* Wird aktiviert wenn relative Pfadangabe möglich gemacht wird */
     {
-/*
+/*     char cwd[PATH_MAX];
     if(dir[0] != '/'){
         getcwd(cwd,PATH_MAX);
 
