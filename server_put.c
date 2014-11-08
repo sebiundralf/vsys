@@ -7,13 +7,15 @@ void s_put(char* dir, int socket)
     int fsize, statt;
 
     strcpy(buffer,"ok");
-    write(socket,buffer,BUF);
+  if(write(socket,buffer,BUF)==-1)
+            perror("Error writing stuff");
     memset(buffer,'\0',sizeof(buffer));
 
     do
     {
         statt = read(socket, &fsize, sizeof(int));
     }
+
     while(statt<0);
 
 
@@ -21,8 +23,8 @@ void s_put(char* dir, int socket)
         printf("%s \n",buffer);
     else
     {
-        int filesize = fsize;
-        int fsizemsg = fsize;
+       // int filesize = fsize;
+       // int fsizemsg = fsize;
         fsize = 0;
         memset(buffer,'\0',sizeof(buffer));
 
@@ -35,17 +37,20 @@ void s_put(char* dir, int socket)
 
 
         strcpy(buffer,"ok2");
-        write(socket,buffer,BUF);
+        if(write(socket,buffer,BUF)==-1)
+            perror("Error writing stuff");
         memset(buffer,'\0',sizeof(buffer));
 
-        read(socket,buffer,BUF);
+        if(read(socket,buffer,BUF))
+            perror("Error reading stuff");
 
         strcpy(file_name,buffer);
 
         memset(buffer,'\0',sizeof(buffer));
 
         strcpy(buffer,"ok3");
-        write(socket,buffer,BUF);
+        if(write(socket,buffer,BUF)==-1)
+            perror("Error writing stuff");
         memset(buffer,'\0',sizeof(buffer));
 
 
@@ -63,11 +68,14 @@ void s_put(char* dir, int socket)
             return;
         }
 
-        struct timeval timeout = {10,0};
 
-        fd_set fds;
-        int buffer_fd;
+
+
         /*
+                struct timeval timeout = {10,0};
+            fd_set fds;
+
+             int buffer_fd;
                 while (filesize>0)
                 {
 

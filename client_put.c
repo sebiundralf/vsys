@@ -16,7 +16,8 @@ void c_put(int socket, char* file)
     char buffer[BUF];
     FILE * fp;
 
-    getcwd(path, 512);
+    if(getcwd(path, 512)==NULL)
+        perror("Couldn't get directory");
 
 
 
@@ -48,11 +49,13 @@ void c_put(int socket, char* file)
     char* msg = "put";
 
 
-    send(socket, msg, strlen (msg), 0);
+    if(send(socket, msg, strlen (msg), 0)==-1)
+        perror("Error sending stuff");
 
     do
     {
-        read(socket,buffer,BUF);
+        if(read(socket,buffer,BUF)==-1)
+            perror("Error reading stuff");
     }
 
     while(strcmp(buffer,"ok"));
@@ -66,7 +69,8 @@ void c_put(int socket, char* file)
 
     printf("File size: %i b\n", fsize);
 
-    write(socket,(void*)&fsize,sizeof(int));
+    if(write(socket,(void*)&fsize,sizeof(int))==-1)
+        perror("Error writing stuff");
 
 
     int block_sz;
@@ -80,17 +84,20 @@ void c_put(int socket, char* file)
             memset(buffer, '\0', sizeof(buffer));
             do
             {
-                read(socket,buffer,BUF);
+                      if(read(socket,buffer,BUF)==-1)
+            perror("Error reading stuff");
 
             }
             while(strcmp(buffer,"ok2"));
             memset(buffer, '\0', sizeof(buffer));
             strcpy(buffer,file);
-            write(socket,buffer,BUF);
+                    if(write(socket,buffer,BUF)==-1)
+            perror("Error writing stuff");
             memset(buffer, '\0', sizeof(buffer));
             do
             {
-                read(socket,buffer,BUF);
+                      if(read(socket,buffer,BUF)==-1)
+            perror("Error reading stuff");
 
             }
             while(strcmp(buffer,"ok3"));
@@ -126,7 +133,8 @@ void c_put(int socket, char* file)
         printf("Couldn't find file %s\n", file);
         memset(buffer,'\0',sizeof(buffer));
         strcpy(buffer, "Sending file failed");
-        write(socket,buffer,BUF);
+        if(write(socket,buffer,BUF)==-1)
+            perror("Error writing stuff");
 
 
     }

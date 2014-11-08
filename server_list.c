@@ -12,12 +12,15 @@ void s_list (char* dir, int socket)
 
     memset(buffer, 0, sizeof(buffer));
 
-    if ((d = opendir(dir)) != NULL){
+    if ((d = opendir(dir)) != NULL)
+    {
 
-        while((entry = readdir(d)) !=NULL){
+        while((entry = readdir(d)) !=NULL)
+        {
             memset(path,0,sizeof(path));
 
-            if(entry->d_type != DT_DIR){
+            if(entry->d_type != DT_DIR)
+            {
 
                 int bufsize= (int)strlen(buffer);
                 int filesize= (int)strlen(entry->d_name);
@@ -38,14 +41,18 @@ void s_list (char* dir, int socket)
                 int tmpsize = (int)strlen(tmp);
                 tmp[tmpsize] = '\0';
 
-                if(BUF - bufsize >= (tmpsize+filesize+20)){
+                if(BUF - bufsize >= (tmpsize+filesize+20))
+                {
                     strcat(buffer,entry->d_name);
                     strcat(buffer," || Filesize: ");
                     strcat(buffer,tmp);
                     strcat(buffer, "B\n");
                     free(tmp);
-                }else{
-                    write(socket, buffer, BUF);
+                }
+                else
+                {
+                    if(write(socket, buffer, BUF)==-1)
+                        perror("Error writing stuff");
                     memset(buffer,0,sizeof(buffer));
                     strcpy(buffer,entry->d_name);
                     strcat(buffer," || Filesize: ");
@@ -60,20 +67,25 @@ void s_list (char* dir, int socket)
         }
 
 
-    }else{
-      perror ("Could not open directory");
-      return EXIT_FAILURE;
+    }
+    else
+    {
+        perror ("Could not open directory");
+        return;
     }
 
-    if(strlen(buffer) != 0){
-        write(socket, buffer, BUF);
+    if(strlen(buffer) != 0)
+    {
+        if(write(socket, buffer, BUF)==-1)
+            perror("Error writing stuff");
         memset(buffer,0,sizeof(buffer));
     }
 
-    write(socket, buffer, BUF);
+    if(write(socket, buffer, BUF)==-1)
+            perror("Error writing stuff");
     closedir(d);
 
-   printf("sending list successful\n");
+    printf("sending list successful\n");
 
 }
 

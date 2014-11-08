@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 
     char* vip = NULL; //IP-Adresse des Servers, Variable muss später freigegeben werden
     int vport = -1; //Portnummer
-    int error = 0; //nur temorär verwendet zum debugging
+   // int error = 0; //nur temorär verwendet zum debugging
 
     /* Start der GETOPT behandlung */
     {
@@ -92,6 +92,7 @@ int main(int argc, char* argv[])
             address.sin_family = AF_INET;
             address.sin_port = htons (vport);
             inet_aton(vip, &address.sin_addr);
+            free(vip);
         }
         /* connect */
         {
@@ -135,9 +136,11 @@ int main(int argc, char* argv[])
                 if(!strcasecmp(command, "LIST"))
                 {
                     printf("List wird ausgeführt\n\nListe:\n");
-                    send(create_socket, command, strlen (command), 0);
+                    if(send(create_socket, command, strlen (command), 0)==-1)
+                        perror("Error sending stuff");
                     do{
-                    read(create_socket,buffer, BUF);
+                    if(read(create_socket,buffer, BUF)==-1)
+                     perror("Error writing stuff");
                     //buffer[BUF-1] = '\0';
                     printf("%s",buffer);
 
@@ -162,7 +165,7 @@ int main(int argc, char* argv[])
                 else
                 {
                     printf("Unknown command: %s\n", command);
-                    error = 1;
+                    //error = 1;
                 }
             }
 
