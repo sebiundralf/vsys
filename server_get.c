@@ -2,6 +2,75 @@
 
 void s_get(char* dir, int socket)
 {
+    char buffer[BUF];
+
+    /* Verbindungsaufbau */
+
+    {
+       strcpy(buffer,"server ready");
+        if(write(socket,buffer,BUF)==-1)
+            perror("Error writing stuff");
+
+        memset(buffer,'\0',sizeof(buffer));
+    }
+
+
+
+
+    DIR *dir;
+    char path[MAX_PATH];
+    char file_name[MAX_PATH];
+    char buffer[BUF];
+    FILE * fp;
+
+
+
+
+            if(read(socket,buffer,BUF)==-1)
+                perror("Error reading stuff (filename)");
+
+            strcpy(file_name,buffer);
+
+            memset(buffer,'\0',sizeof(buffer));
+
+            strcpy(buffer,"filename ok");
+            if(write(socket,buffer,BUF)==-1)
+                perror("Error writing stuff");
+
+
+            memset(buffer,'\0',sizeof(buffer));
+
+            printf("Filename \"%s\" recieved\n", file_name);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /* Alter Code
     DIR *d;
     struct dirent *entry;
     char path[PATH_MAX];
@@ -84,5 +153,5 @@ void s_get(char* dir, int socket)
     }
         free(tmpfile);
         closedir(d);
-
+*/
 }
