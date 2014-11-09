@@ -12,6 +12,7 @@ void s_list (char* dir, int socket)
 
     memset(buffer, 0, sizeof(buffer));
 
+   // printf("Dir: %s\n", dir);
     if ((d = opendir(dir)) != NULL)
     {
 

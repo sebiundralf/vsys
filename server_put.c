@@ -42,65 +42,65 @@ void s_put(char* dir, int socket)
         //  printf("%s \n",buffer);
 
         //else
+
+        int filesize = fsize;
+        // int fsizemsg = fsize;
+        fsize = 0;
+        memset(buffer,'\0',sizeof(buffer));
+
+
+        FILE *fp;
+
+        char path[MAX_PATH];
+        char file_name[MAX_PATH];
+        memset(path,'\0',sizeof(path));
+
+
+
+        if(read(socket,buffer,BUF)==-1)
+            perror("Error reading stuff (filename)");
+
+        strcpy(file_name,buffer);
+
+        memset(buffer,'\0',sizeof(buffer));
+
+        strcpy(buffer,"filename ok");
+        if(write(socket,buffer,BUF)==-1)
+            perror("Error writing stuff");
+
+
+        memset(buffer,'\0',sizeof(buffer));
+
+        printf("Filename \"%s\" recieved\n", file_name);
+
+
+
+        strcpy(path,dir);
+        int t = (int) strlen(path);
+        if(path[t-1]!='/')
+            strcat(path,"/");
+
+        strcat(path,file_name);
+        printf("Filename + path: %s\n", path);
+
+
+
+        if((fp = fopen(path,"w"))==NULL)
         {
-            int filesize = fsize;
-            // int fsizemsg = fsize;
-            fsize = 0;
-            memset(buffer,'\0',sizeof(buffer));
 
+            perror("Could not open file");
 
-            FILE *fp;
-
-            char path[MAX_PATH];
-            char file_name[MAX_PATH];
-            memset(path,'\0',sizeof(path));
-
-
-
-            if(read(socket,buffer,BUF)==-1)
-                perror("Error reading stuff (filename)");
-
-            strcpy(file_name,buffer);
-
-            memset(buffer,'\0',sizeof(buffer));
-
-            strcpy(buffer,"filename ok");
+            strcpy(buffer,"exit");
             if(write(socket,buffer,BUF)==-1)
                 perror("Error writing stuff");
 
-
             memset(buffer,'\0',sizeof(buffer));
-
-            printf("Filename \"%s\" recieved\n", file_name);
-
-
-
-            strcpy(path,dir);
-            int t = (int) strlen(path);
-            if(path[t-1]!='/')
-                strcat(path,"/");
-
-            strcat(path,file_name);
-            printf("Filename + path: %s\n", path);
+            return;
+        }
 
 
 
-            if((fp = fopen(path,"w"))==NULL)
-            {
-
-                perror("Could not open file");
-
-                strcpy(buffer,"exit");
-                if(write(socket,buffer,BUF)==-1)
-                    perror("Error writing stuff");
-
-                memset(buffer,'\0',sizeof(buffer));
-                return;
-            }
-
-
-
-
+        {
             struct timeval timeout = {10,0};
             fd_set fds;
 
@@ -179,7 +179,7 @@ void s_put(char* dir, int socket)
             fclose(fp);
 
             //  printf("Submit failed!\n");
-            printf("file put successful\nFilename: %s\nFilesize: %d B\n",file_name,rs);
+            printf("file put successful\nFilename: %s\n",file_name);
 
         }
 

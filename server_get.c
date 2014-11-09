@@ -3,11 +3,14 @@
 void s_get(char* dir, int socket)
 {
     char buffer[BUF];
+    char path[PATH_MAX];
+
+    strcpy(path, dir);
 
     /* Verbindungsaufbau */
 
     {
-       strcpy(buffer,"server ready");
+        strcpy(buffer,"server ready");
         if(write(socket,buffer,BUF)==-1)
             perror("Error writing stuff");
 
@@ -17,141 +20,151 @@ void s_get(char* dir, int socket)
 
 
 
-    DIR *dir;
-    char path[MAX_PATH];
+
+
     char file_name[MAX_PATH];
-    char buffer[BUF];
     FILE * fp;
 
 
 
 
-            if(read(socket,buffer,BUF)==-1)
-                perror("Error reading stuff (filename)");
+    if(read(socket,buffer,BUF)==-1)
+        perror("Error reading stuff (filename)");
 
-            strcpy(file_name,buffer);
+    strcpy(file_name,buffer);
 
-            memset(buffer,'\0',sizeof(buffer));
+    memset(buffer,'\0',sizeof(buffer));
 
-            strcpy(buffer,"filename ok");
-            if(write(socket,buffer,BUF)==-1)
-                perror("Error writing stuff");
-
-
-            memset(buffer,'\0',sizeof(buffer));
-
-            printf("Filename \"%s\" recieved\n", file_name);
+    strcpy(buffer,"filename ok");
+    if(write(socket,buffer,BUF)==-1)
+        perror("Error writing stuff");
 
 
+    memset(buffer,'\0',sizeof(buffer));
+
+    printf("Filename \"%s\" recieved\n", file_name);
 
 
 
 
+    int l = strlen(path);
+
+    if(path[l-1] != '/')
+    {
+        strcat(path,"/");
+    }
+    strcat(path,file_name);
 
 
+    printf("%s\n", path);
 
 
+    if((fp = fopen(path, "rb")) == NULL)
+    {
+        printf("Couldn't open file \"%s\"\n",file_name);
+        strcpy(buffer,"exit");
+        if(write(socket,buffer,BUF)==-1)
+            perror("Error writing stuff");
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /* Alter Code
-    DIR *d;
-    struct dirent *entry;
-    char path[PATH_MAX];
-    char buffer[BUF];
-    char* file;
-
-    int success = 0;
-    char* tmpfile = malloc(sizeof(char*));
-
-    memset(path,0,sizeof(path));
-
-    int temp = (int) strlen(dir);
-
-    if((d = opendir(dir)) != NULL){
-
-        strcat(path,dir);
-
-        if(dir[temp-1] != '/'){
-            strcat(path,"/");
-        }
-
-        while((entry = readdir(d)) != NULL){
-
-            strcpy(tmpfile,file);
-            int flen = strlen(tmpfile);
-            tmpfile[flen-1] = '\0';
-
-            if(strcmp(entry->d_name,tmpfile) == 0){
-                FILE* fp;
-                strcat(path,tmpfile);
-
-                if((fp = fopen(path,"rb")) != NULL){
-
-                    struct stat st;
-                    stat(path, &st);
-
-                    char* temp1 = malloc(sizeof(char*));
-                    sprintf(temp1,"%ld", (unsigned long)st.st_size);
-
-                    write(socket,temp1,BUF);
-                    free(temp1);
-
-                    int block_tr;
-
-                    while(!feof(fp)){
-                        memset(buffer,0,sizeof(buffer));
-                        if((block_tr = fread(buffer, sizeof(char), BUF, fp)) < 0){
-                            perror("ERROR: Could not read file.");
-                            return;
-                        }
-                        if(write(socket, buffer, block_tr) < 0){
-                            perror("ERROR: Failed to send file.");
-                            return;
-                        }
-                        success = 1;
-                    }
-                    fclose(fp);
-
-                }else{
-                    perror("ERROR: Could not open file.");
-                    return;
-                }
-
-
-            }
-        }
-
-    }else{
-      perror ("ERROR: Could not open directory.");
-      return;
+        memset(buffer,'\0',sizeof(buffer));
+        return;
     }
 
-    if(success){
-        printf("File %s was transfered successfully.\n", path);
-    }else{
-        memset(buffer,0,sizeof(buffer));
-        strcpy(buffer,"ERROR: Unable to find ");
-        strcat(buffer,tmpfile);
-        write(socket, buffer, BUF);
+
+    strcpy(buffer,"start");
+    if(write(socket,buffer,BUF)==-1)
+        perror("Error writing stuff");
+
+    memset(buffer,'\0',sizeof(buffer));
+
+    /* PUT BEGINNT */
+
+
+
+    int fsize;
+
+    fseek(fp,0,SEEK_END);
+    fsize=ftell(fp);
+    fseek(fp,0,SEEK_SET);
+
+
+
+    if(write(socket,(void*)&fsize,sizeof(int))==-1)
+        perror("Error writing stuff");
+
+    printf("File size: %i b\n", fsize);
+
+
+
+    do
+    {
+        if(read(socket,buffer,BUF)==-1)
+            perror("Error reading stuff");
+        if(!strcmp(buffer,"exit"))
+        {
+            printf("Error client, get failded");
+            fclose(fp);
+
+            return;
+        }
     }
-        free(tmpfile);
-        closedir(d);
-*/
+
+    while(strcmp(buffer,"size ok"));
+
+    memset(buffer, '\0', sizeof(buffer));
+
+
+    int block_sz;
+    int errorf = 1;
+
+    int counter = 0;
+
+    printf("start sending..\n");
+
+    while(!feof(fp))
+        /* File übertragen */
+    {
+
+
+        memset(buffer, '\0', sizeof(buffer));
+
+
+        if((block_sz = fread(buffer,1, sizeof(buffer)-1, fp))<0)
+        {
+            printf("Error: couldn't read file\n");
+            return;
+
+        }
+
+
+        int status;
+        do
+        {
+            status = write(socket, buffer, block_sz);
+        }
+
+        while(status<0);
+        printf("Block %d sent\n", counter);
+        counter++;
+        errorf=0;
+        //break;
+    }
+
+
+    if(errorf)
+    {
+        printf("Couldn't find file %s\n", file_name);
+        memset(buffer,'\0',sizeof(buffer));
+
+        /*  strcpy(buffer, "Sending file failed");
+          if(write(socket,buffer,BUF)==-1)
+              perror("Error writing stuff");
+        */
+
+    }
+    else
+        printf("File %s was sent to client!\n", file_name);
+
+
+    fclose(fp);
 }
