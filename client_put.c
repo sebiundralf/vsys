@@ -1,6 +1,7 @@
 #include "client.h"
 
 
+
 void c_put(int socket, char* file)
 {
 
@@ -11,12 +12,12 @@ void c_put(int socket, char* file)
     }
 
     DIR *dir;
-    char path[512];
-    char path2[512];
+    char path[MAX_PATH];
+    char path2[MAX_PATH];
     char buffer[BUF];
     FILE * fp;
 
-    if(getcwd(path, 512)==NULL)
+    if(getcwd(path, MAX_PATH)==NULL)
         perror("Couldn't get directory");
 
 
@@ -58,7 +59,13 @@ void c_put(int socket, char* file)
             perror("Error reading stuff");
     }
 
-    while(strcmp(buffer,"ok"));
+    while(strcmp(buffer,"server ready"));
+
+    printf("%s\n",buffer);
+
+
+    /* PUT BEGINNT */
+
 
 
     int fsize;
@@ -67,40 +74,79 @@ void c_put(int socket, char* file)
     fsize=ftell(fp);
     fseek(fp,0,SEEK_SET);
 
-    printf("File size: %i b\n", fsize);
+
 
     if(write(socket,(void*)&fsize,sizeof(int))==-1)
         perror("Error writing stuff");
+
+    printf("File size: %i b\n", fsize);
+
+
+
+    do
+    {
+        if(read(socket,buffer,BUF)==-1)
+            perror("Error reading stuff");
+    }
+
+    while(strcmp(buffer,"size ok"));
+
+
 
 
     int block_sz;
     int errorf = 1;
     int fname_sent = 0;
-
+    int counter = 0;
     while(!feof(fp))
     {
         if(!fname_sent)
         {
             memset(buffer, '\0', sizeof(buffer));
-            do
-            {
-                      if(read(socket,buffer,BUF)==-1)
-            perror("Error reading stuff");
 
-            }
-            while(strcmp(buffer,"ok2"));
-            memset(buffer, '\0', sizeof(buffer));
+
             strcpy(buffer,file);
-                    if(write(socket,buffer,BUF)==-1)
-            perror("Error writing stuff");
+
+
+            if(write(socket,buffer,BUF)==-1)
+                perror("Error writing stuff");
             memset(buffer, '\0', sizeof(buffer));
             do
             {
-                      if(read(socket,buffer,BUF)==-1)
-            perror("Error reading stuff");
+                if(read(socket,buffer,BUF)==-1)
+                    perror("Error reading stuff");
 
             }
-            while(strcmp(buffer,"ok3"));
+            while(strcmp(buffer,"filename ok"));
+
+            printf("Filename sent\n");
+
+            fname_sent= 1;
+
+            strcpy(buffer,"start sending");
+
+
+            if(write(socket,buffer,BUF)==-1)
+                perror("Error writing stuff");
+            memset(buffer, '\0', sizeof(buffer));
+
+
+            do
+            {
+                if(read(socket,buffer,BUF)==-1)
+                    perror("Error reading stuff\n");
+
+                if(!strcmp(buffer,"exit")){
+                    perror("Server error\n");
+                    return;
+
+
+                }
+
+            }
+            while(strcmp(buffer,"server ok"));
+
+            memset(buffer, '\0', sizeof(buffer));
 
 
         }
@@ -119,12 +165,13 @@ void c_put(int socket, char* file)
         int status;
         do
         {
-            //status = write(socket, buffer, block_sz);
+            status = write(socket, buffer, block_sz);
         }
         while(status<0);
-
+        printf("Block %d sent\n", counter);
+        counter++;
         errorf=0;
-        break;
+        //break;
     }
 
 
@@ -146,6 +193,8 @@ void c_put(int socket, char* file)
 
     fclose(fp);
     closedir(dir);
+
+
 }
 
 
