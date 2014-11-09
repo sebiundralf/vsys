@@ -16,10 +16,10 @@
 #include <ftw.h>
 
 #define BUF 1024
-#define PATH_MAX 255
+#define MAX_PATH 512
 
 void s_list (char* dir, int socket);
-void s_get(char* dir, char* file, int socket);
+void s_get(char* dir,  int socket);
 void s_put(char* dir, int socket);
 
 

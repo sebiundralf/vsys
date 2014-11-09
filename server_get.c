@@ -1,11 +1,12 @@
 #include "server.h"
 
-void s_get(char* dir, char* file, int socket)
+void s_get(char* dir, int socket)
 {
     DIR *d;
     struct dirent *entry;
     char path[PATH_MAX];
     char buffer[BUF];
+    char* file;
 
     int success = 0;
     char* tmpfile = malloc(sizeof(char*));
