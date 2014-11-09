@@ -63,7 +63,7 @@ void c_put(int socket, char* file)
 
     printf("%s\n",buffer);
 
-
+ memset(buffer, '\0', sizeof(buffer));
     /* PUT BEGINNT */
 
 
@@ -91,20 +91,22 @@ void c_put(int socket, char* file)
 
     while(strcmp(buffer,"size ok"));
 
-
+     memset(buffer, '\0', sizeof(buffer));
 
 
     int block_sz;
     int errorf = 1;
     int fname_sent = 0;
     int counter = 0;
+
+
+
     while(!feof(fp))
+    /* File übertragen */
     {
-        if(!fname_sent)
+        if(!fname_sent) //Name senden
         {
             memset(buffer, '\0', sizeof(buffer));
-
-
             strcpy(buffer,file);
 
 
@@ -136,11 +138,10 @@ void c_put(int socket, char* file)
                 if(read(socket,buffer,BUF)==-1)
                     perror("Error reading stuff\n");
 
-                if(!strcmp(buffer,"exit")){
+                if(!strcmp(buffer,"exit"))
+                {
                     perror("Server error\n");
                     return;
-
-
                 }
 
             }
@@ -179,10 +180,11 @@ void c_put(int socket, char* file)
     {
         printf("Couldn't find file %s\n", file);
         memset(buffer,'\0',sizeof(buffer));
-        strcpy(buffer, "Sending file failed");
-        if(write(socket,buffer,BUF)==-1)
-            perror("Error writing stuff");
 
+        /*  strcpy(buffer, "Sending file failed");
+          if(write(socket,buffer,BUF)==-1)
+              perror("Error writing stuff");
+        */
 
     }
     else

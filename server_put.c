@@ -20,8 +20,8 @@ void s_put(char* dir, int socket)
 
     {
         int fsize, statt;
-                        int rs;
-                int ws;
+        int rs; //reading size
+        int ws; //writing size
         do
         {
             statt = read(socket, &fsize, sizeof(int));
@@ -151,8 +151,8 @@ void s_put(char* dir, int socket)
                     while(rs<0);
 
 
-                //    memset(buffer,'\0',sizeof(buffer));
-                   // fsize = recv(socket,buffer,BUF,0);
+                    //    memset(buffer,'\0',sizeof(buffer));
+                    // fsize = recv(socket,buffer,BUF,0);
 
                     ws = fwrite(buffer, 1,rs,fp);
                     memset(buffer,'\0',sizeof(buffer));
@@ -169,7 +169,7 @@ void s_put(char* dir, int socket)
 
 
                     filesize -= rs;
-                   // break;
+                    // break;
                 }
 
 
@@ -178,8 +178,8 @@ void s_put(char* dir, int socket)
 
             fclose(fp);
 
-          //  printf("Submit failed!\n");
-              printf("file put successful\nFilename: %s\nFilesize: %d B\n",file_name,rs);
+            //  printf("Submit failed!\n");
+            printf("file put successful\nFilename: %s\nFilesize: %d B\n",file_name,rs);
 
         }
 
