@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #define BUF 1024
+#define MAX_PATH 512
 
 
 

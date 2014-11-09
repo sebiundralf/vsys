@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
                         }
                         else
                         {
-                            printf("The fuck dude? We shouldn't be here..");
+                            printf("The fuck dude? We shouldn't be here..\n");
                         }
                     }
                 }
