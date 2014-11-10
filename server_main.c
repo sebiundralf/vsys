@@ -4,7 +4,12 @@
 #define PATH_MAX 255
 #endif
 
+char* vdir = NULL; //Verzeichnispfad, muss später freigegeben werden
 void checkdir(char* dir);
+
+
+
+
 
 /* Funktion print_usage() zur Ausgabe der usage Meldung */
 void print_usage()
@@ -13,13 +18,25 @@ void print_usage()
     exit(EXIT_FAILURE);
 }
 
+/* Signal handler für STRG + C (zum beenden) */
 
+void strgc_handler(int sig)
+{
+
+    if(vdir){
+    free(vdir);
+    }
+
+    printf("\n\n...Server wurde beendet.\n");
+    _exit(0);
+}
 
 int main(int argc, char* argv[])
 
 {
-    char* vdir = NULL; //Verzeichnispfad, muss später freigegeben werden
+
     int vport = -1; //Portnummer
+     (void) signal(SIGINT,strgc_handler);
 
 
     /* Start der GETOPT behandlung */
@@ -176,7 +193,7 @@ int main(int argc, char* argv[])
 
     }
     /* ENDE VERBINDUNG */
-
+    free(vdir);
 
     return 0;
 }

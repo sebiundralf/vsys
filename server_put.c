@@ -4,10 +4,8 @@ void s_put(char* dir, int socket)
 {
     /* Verbindungsaufbau */
     char buffer[BUF];
+    memset(buffer,'\0',sizeof(buffer));
     {
-
-
-
 
         strcpy(buffer,"server ready");
         if(write(socket,buffer,BUF)==-1)

@@ -4,7 +4,7 @@ void s_get(char* dir, int socket)
 {
     char buffer[BUF];
     char path[PATH_MAX];
-
+    memset(buffer,'\0',sizeof(buffer));
     strcpy(path, dir);
 
     /* Verbindungsaufbau */

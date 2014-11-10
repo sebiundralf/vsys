@@ -14,6 +14,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <ftw.h>
+#include <signal.h>
 
 #define BUF 1024
 #define MAX_PATH 512
