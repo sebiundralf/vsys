@@ -4,15 +4,38 @@
 
 void s_list (char* dir, int socket)
 {
-    //ftw(dir, list, 1);
+
     DIR *d;
     struct dirent *entry;
     char path[PATH_MAX];
     char buffer[BUF];
 
+
+    memset(buffer,'\0',sizeof(buffer));
+    {
+
+        strcpy(buffer,"server ready");
+        if(write(socket,buffer,BUF)==-1)
+            perror("Error writing stuff");
+
+        memset(buffer,'\0',sizeof(buffer));
+    }
+    do
+    {
+        if(read(socket,buffer,BUF)==-1)
+            perror("Error reading stuff");
+    }
+
+    while(strcmp(buffer,"start"));
+
+
+
+    //ftw(dir, list, 1);
+
+
     memset(buffer, 0, sizeof(buffer));
 
-   // printf("Dir: %s\n", dir);
+    // printf("Dir: %s\n", dir);
     if ((d = opendir(dir)) != NULL)
     {
 

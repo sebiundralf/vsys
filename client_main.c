@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 
     char* vip = NULL; //IP-Adresse des Servers, Variable muss später freigegeben werden
     int vport = -1; //Portnummer
-   // int error = 0; //nur temorär verwendet zum debugging
+    // int error = 0; //nur temorär verwendet zum debugging
 
     /* Start der GETOPT behandlung */
     {
@@ -136,15 +136,42 @@ int main(int argc, char* argv[])
                 if(!strcasecmp(command, "LIST"))
                 {
                     printf("List wird ausgeführt\n\nListe:\n");
+
                     if(send(create_socket, command, strlen (command), 0)==-1)
                         perror("Error sending stuff");
-                    do{
-                    if(read(create_socket,buffer, BUF)==-1)
-                     perror("Error writing stuff");
-                    //buffer[BUF-1] = '\0';
-                    printf("%s",buffer);
 
-                    }while (strlen(buffer)!=0);
+                    do
+                    {
+                        if(read(create_socket,buffer,BUF)==-1)
+                            perror("Error reading stuff");
+                    }
+                    while(strcmp(buffer,"server ready"));
+
+                    memset(buffer,'\0',sizeof(buffer));
+                    {
+
+                        strcpy(buffer,"start");
+                        if(write(create_socket,buffer,BUF)==-1)
+                            perror("Error writing stuff");
+
+                        memset(buffer,'\0',sizeof(buffer));
+                    }
+
+                    do
+                    {
+                        if(read(create_socket,buffer, BUF)==-1)
+                            perror("Error writing stuff");
+                        //buffer[BUF-1] = '\0';
+                        printf("%s",buffer);
+                        /*  if(!strcmp(buffer,"list"))
+                          {
+                              perror("\”Server error, shut down client\n");
+                              return EXIT_FAILURE;
+
+                          }*/
+
+                    }
+                    while (strlen(buffer)!=0);
                     printf("\n");
 
                 }
