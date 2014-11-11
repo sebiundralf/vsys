@@ -28,7 +28,7 @@ void s_list (char* dir, int socket)
 
     while(strcmp(buffer,"start"));
 
-
+    printf("start listing..\n");
 
     //ftw(dir, list, 1);
 
@@ -42,6 +42,7 @@ void s_list (char* dir, int socket)
         while((entry = readdir(d)) !=NULL)
         {
             memset(path,0,sizeof(path));
+
 
             if(entry->d_type != DT_DIR)
             {
@@ -59,7 +60,8 @@ void s_list (char* dir, int socket)
                 strcat(path,entry->d_name);
                 stat(path, &st);
 
-                char *tmp = malloc(sizeof(char*));
+                char *tmp = malloc(sizeof(char*)*12);
+                //printf("Entry: %s size: %ld\n", entry->d_name,(unsigned long)st.st_size);
                 sprintf(tmp, "%ld", (unsigned long)st.st_size);
 
                 int tmpsize = (int)strlen(tmp);
@@ -70,7 +72,7 @@ void s_list (char* dir, int socket)
                     strcat(buffer,entry->d_name);
                     strcat(buffer," || Filesize: ");
                     strcat(buffer,tmp);
-                    strcat(buffer, "B\n");
+                    strcat(buffer, " byte\n");
                     free(tmp);
                 }
                 else
