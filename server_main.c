@@ -5,6 +5,7 @@
 #endif
 
 char* vdir = NULL; //Verzeichnispfad, muss später freigegeben werden
+int create_socket;
 void checkdir(char* dir);
 
 
@@ -14,7 +15,7 @@ void checkdir(char* dir);
 /* Funktion print_usage() zur Ausgabe der usage Meldung */
 void print_usage()
 {
-    fprintf(stderr,"\nUsage: vsys_server -p PORT -d DIRECTORY (Absolute) \n\n");
+    fprintf(stderr,"\nUsage: vsys_server -p PORT -d DIRECTORY (Absolute or subfolders) \n\n");
     exit(EXIT_FAILURE);
 }
 
@@ -23,9 +24,12 @@ void print_usage()
 void strgc_handler(int sig)
 {
 
-    if(vdir){
-    free(vdir);
+    if(vdir)
+    {
+        free(vdir);
     }
+    if(create_socket)
+        close(create_socket);
 
     printf("\n\n...Server wurde beendet.\n");
     _exit(0);
@@ -36,7 +40,7 @@ int main(int argc, char* argv[])
 {
 
     int vport = -1; //Portnummer
-     (void) signal(SIGINT,strgc_handler);
+    (void) signal(SIGINT,strgc_handler);
 
 
     /* Start der GETOPT behandlung */
@@ -103,11 +107,12 @@ int main(int argc, char* argv[])
 
     /* ANFANG Verbindungsaufbau */
     {
-        int create_socket, new_socket;
+        int new_socket, new_socket0;
         socklen_t addrlen;
         char buffer[BUF];
         int size;
         struct sockaddr_in address, cliaddress;
+        pid_t process;
 
         create_socket = socket (AF_INET, SOCK_STREAM, 0);
 
@@ -128,70 +133,94 @@ int main(int argc, char* argv[])
         while (1)
         {
             printf("Waiting for connections...\n");
-            new_socket = accept ( create_socket, (struct sockaddr *) &cliaddress, &addrlen );
-            if (new_socket > 0)
+            new_socket0 = accept ( create_socket, (struct sockaddr *) &cliaddress, &addrlen );
+
+
+            process = fork();
+            if (process == -1)
             {
-                printf ("Client connected from %s:%d...\n", inet_ntoa (cliaddress.sin_addr),ntohs(cliaddress.sin_port));
-                strcpy(buffer,"Welcome to vsys_server, Please enter your command:\n");
-                send(new_socket, buffer, strlen(buffer),0);
-            }
-            do
-            {
-                size = recv (new_socket, buffer, BUF-1, 0);
-                if( size > 0)
+                new_socket=new_socket0;
+                if (new_socket > 0)
                 {
-                    buffer[size] = '\0';
-                         printf ("Message received: %s\n", buffer);
-                    /* Befehl auslesen */
+                    strcpy(buffer,"fail");
+                    if(send(new_socket0, buffer, strlen (buffer), 0)==-1)
+                        perror("Error sending stuff");
+                }
+
+                return 1;
+            }
+
+            if(process==0)
+            {
+                new_socket = new_socket0;
+                if (new_socket > 0)
+                {
+                    printf ("Client connected from %s:%d...\n", inet_ntoa (cliaddress.sin_addr),ntohs(cliaddress.sin_port));
+                    strcpy(buffer,"win");
+                    if(send(new_socket0, buffer, strlen (buffer), 0)==-1)
+                        perror("Error sending stuff");
+                }
+
+                do
+                {
+                    size = recv (new_socket, buffer, BUF-1, 0);
+                    if( size > 0)
                     {
-                        if(!strcasecmp(buffer, "LIST"))
+                        buffer[size] = '\0';
+                        // printf ("Message received: %s\n", buffer);
+                        /* Befehl auslesen */
                         {
+                            if(!strcasecmp(buffer, "LIST"))
+                            {
 
-                            printf("List wird ausgeführt\n");
-                            s_list(vdir, new_socket);
+                                printf("List wird ausgeführt\n");
+                                s_list(vdir, new_socket);
 
-                        }
-                        else if(!strcasecmp(buffer, "GET"))
-                        {
-                            printf("Get wird ausgeführt\n");
-                            s_get(vdir, new_socket);
+                            }
+                            else if(!strcasecmp(buffer, "GET"))
+                            {
+                                printf("Get wird ausgeführt\n");
+                                s_get(vdir, new_socket);
 
-                        }
-                        else if(!strcasecmp(buffer, "PUT"))
-                        {
-                            printf("Put wird ausgeführt\n");
-                            s_put(vdir, new_socket);
+                            }
+                            else if(!strcasecmp(buffer, "PUT"))
+                            {
+                                printf("Put wird ausgeführt\n");
+                                s_put(vdir, new_socket);
 
 
-                        }
-                        else if(!strcasecmp(buffer, "QUIT"))
-                        {
-                            printf("Client quit\n");
+                            }
+                            else if(!strcasecmp(buffer, "QUIT"))
+                            {
+                                printf("Client quit\n");
 
-                        }
-                        else
-                        {
-                            printf("The fuck dude? We shouldn't be here..\n");
+                            }
+                            else
+                            {
+                                printf("The fuck dude? We shouldn't be here..\n");
+                            }
                         }
                     }
+                    else if (size == 0)
+                    {
+                        printf("Client closed remote socket\n");
+                        _exit(0);
+                    }
+                    else
+                    {
+                        perror("recv error");
+                        return EXIT_FAILURE;
+                    }
                 }
-                else if (size == 0)
-                {
-                    printf("Client closed remote socket\n");
-                    break;
-                }
-                else
-                {
-                    perror("recv error");
-                    return EXIT_FAILURE;
-                }
+                while (strcasecmp (buffer, "QUIT")  != 0);
+                close (new_socket);
+                _exit(0);
+
             }
-            while (strcasecmp (buffer, "QUIT")  != 0);
-            close (new_socket);
         }
         close (create_socket);
-
     }
+
     /* ENDE VERBINDUNG */
     free(vdir);
 
@@ -206,34 +235,46 @@ void checkdir(char* dir)
 
     /* Wird aktiviert wenn relative Pfadangabe möglich gemacht wird */
     {
-/*     char cwd[PATH_MAX];
-    if(dir[0] != '/'){
-        getcwd(cwd,PATH_MAX);
 
-        char* token1 = NULL;
-        char* token2 = NULL;
-        char abPath[PATH_MAX] = "";
+        if(dir[0] != '/')
+        {
+            /*
+               char cwd[PATH_MAX];
+               getcwd(cwd,PATH_MAX);
 
-        token2 = strtok(dir,"/");
-        token1 = strtok(cwd,"/");
+               int sl = 0;
 
-        while(token1 != NULL){
-            strcat(abPath,"/");
-            strcat(abPath,token1);
+               printf("cwd: %s", cwd);
 
-            if(strcmp(token1,token2) == 0){
-                break;
-            }
-            token1 = strtok(NULL,"/");
+               char* token1 = NULL;
+               char* token2 = NULL;
+               char abPath[PATH_MAX] = "";
+
+               token2 = strtok(dir,"/");
+               token1 = strtok(cwd,"/");
+
+               while(token1 != NULL)
+               {
+                   strcat(abPath,"/");
+                   strcat(abPath,token1);
+
+                   if(strcmp(token1,token2) == 0)
+                   {
+                       break;
+                   }
+                   token1 = strtok(NULL,"/");
+               }
+               dir = abPath;*/
+
+
         }
-        dir = abPath;
+
     }
-*/
-}
 
- //   printf("\nPfad: %s\n\n", dir);
+//   printf("\nPfad: %s\n\n", dir);
 
-    if((dirp = opendir(dir)) == NULL){
+    if((dirp = opendir(dir)) == NULL)
+    {
         perror("Failed to open directory: ");
         printf("%s\n", dir);
         print_usage();

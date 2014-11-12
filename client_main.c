@@ -76,7 +76,6 @@ int main(int argc, char* argv[])
         int create_socket;
         char buffer[BUF];
         struct sockaddr_in address;
-        int size;
         char* command;
         char* file;
 
@@ -99,12 +98,21 @@ int main(int argc, char* argv[])
             if (connect ( create_socket, (struct sockaddr *) &address, sizeof (address)) == 0)
             {
                 printf ("Connection with server (%s) established\n", inet_ntoa (address.sin_addr));
-                size=recv(create_socket,buffer,BUF-1, 0);
-                if (size>0)
+                do
                 {
-                    buffer[size]= '\0';
-                    printf("%s",buffer);
+                    if(read(create_socket,buffer,BUF)==-1)
+                        perror("Error reading stuff");
+
+                    if(!strcmp(buffer,"fail"))
+                    {
+                        perror("Server failed, shutting down client...");
+                        close (create_socket);
+                        return EXIT_FAILURE;
+
+                    }
                 }
+                while(strcmp(buffer,"win"));
+
             }
             else
             {
