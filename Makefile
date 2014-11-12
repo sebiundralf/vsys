@@ -4,7 +4,7 @@
 
 SNAME = server
 CNAME = client
-SFLAGS = -g -Wall -O -std=c99 -pedantic -D_BSD_SOURCE
+SFLAGS = -g -Wall -O -std=c99 -pedantic -D_BSD_SOURCE -DLDAP_DEPRECATED -lldap -llber
 CFLAGS = ${SFLAGS}
 
 all : ${SNAME} ${CNAME}
@@ -20,6 +20,8 @@ ${SNAME}_main.o : ${SNAME}_main.c
 ${SNAME}_list.o : ${SNAME}_list.c
 	gcc ${SFLAGS} -c ${SNAME}_list.c
 
+${SNAME}_auth.o : ${SNAME}_auth.c
+	gcc ${SFLAGS} -c ${SNAME}_auth.c
 
 ${SNAME}_get.o : ${SNAME}_get.c
 	gcc ${SFLAGS} -c ${SNAME}_get.c
@@ -32,8 +34,8 @@ ${SNAME}_put.o : ${SNAME}_put.c
 #Client
 
 
-${CNAME} : ${CNAME}_main.o ${CNAME}_list.o ${CNAME}_get.o ${CNAME}_put.o
-	gcc ${CFLAGS} -o vsys_${CNAME} ${CNAME}_main.o ${CNAME}_list.o ${CNAME}_get.o ${CNAME}_put.o
+${CNAME} : ${CNAME}_main.o ${CNAME}_list.o ${CNAME}_get.o ${CNAME}_put.o password.o
+	gcc ${CFLAGS} -o vsys_${CNAME} ${CNAME}_main.o ${CNAME}_list.o ${CNAME}_get.o ${CNAME}_put.o password.o
 
 ${CNAME}_main.o : ${CNAME}_main.c
 	gcc ${CFLAGS} -c ${CNAME}_main.c
@@ -41,11 +43,17 @@ ${CNAME}_main.o : ${CNAME}_main.c
 ${CNAME}_list.o : ${CNAME}_list.c
 	gcc ${CFLAGS} -c ${CNAME}_list.c
 
+${CNAME}_auth.o : ${CNAME}_auth.c
+	gcc ${CFLAGS} -c ${CNAME}_auth.c
+
 ${CNAME}_get.o : ${CNAME}_get.c
 	gcc ${CFLAGS} -c ${CNAME}_get.c
 
 ${CNAME}_put.o : ${CNAME}_put.c
 	gcc ${CFLAGS} -c ${CNAME}_put.c
+
+password.o : password.c
+	gcc ${CFLAGS} -c password.c
 
 
 
