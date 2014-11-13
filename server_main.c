@@ -159,6 +159,15 @@ int main(int argc, char* argv[])
                     strcpy(buffer,"win");
                     if(send(new_socket0, buffer, strlen (buffer), 0)==-1)
                         perror("Error sending stuff");
+
+
+
+                    if(server_auth(new_socket)){
+                        perror("Client auth fail.\n");
+                        _exit(1);
+
+
+                    }
                 }
 
                 do
