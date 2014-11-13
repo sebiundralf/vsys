@@ -134,6 +134,8 @@ int main(int argc, char* argv[])
                 command = strtok(buf2, " ");
                 file = strtok(NULL, " ");
 
+                printf("Command: %s\nFile: %s\nbuf2: %s\n\n",command,file,buf2);
+
             }
             // printf("Command = %s\n", command);
             // if(file!=NULL)

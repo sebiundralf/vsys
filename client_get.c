@@ -188,7 +188,6 @@ void c_get(int socket, char* file)
 
                     if(rs != ws)
                     {
-
                         perror("error in read write\n");
                         printf("rs %d, ws %d\n",rs,ws);
                     }
@@ -197,9 +196,6 @@ void c_get(int socket, char* file)
                     filesize -= rs;
                     // break;
                 }
-
-
-
             }
 
             fclose(fp);

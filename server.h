@@ -15,6 +15,8 @@
 #include <unistd.h>
 #include <ftw.h>
 #include <signal.h>
+#include <ldap.h>
+
 
 #define BUF 1024
 #define MAX_PATH 512
@@ -22,6 +24,7 @@
 void s_list (char* dir, int socket);
 void s_get(char* dir,  int socket);
 void s_put(char* dir, int socket);
+int server_auth (int socket);
 
 
 
