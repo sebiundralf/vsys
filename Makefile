@@ -12,14 +12,17 @@ all : ${SNAME} ${CNAME}
 
 #Server
 
-${SNAME} : ${SNAME}_main.o ${SNAME}_list.o ${SNAME}_get.o ${SNAME}_put.o ${SNAME}_auth.o
-	gcc ${SFLAGS} -o vsys_${SNAME} ${SNAME}_main.o ${SNAME}_list.o ${SNAME}_get.o ${SNAME}_put.o ${SNAME}_auth.o ${LDFLAGS}
+${SNAME} : ${SNAME}_main.o ${SNAME}_list.o ${SNAME}_get.o ${SNAME}_put.o ${SNAME}_auth.o ${SNAME}_blacklistfunktions.o 
+	gcc ${SFLAGS} -o vsys_${SNAME} ${SNAME}_main.o ${SNAME}_list.o ${SNAME}_get.o ${SNAME}_put.o ${SNAME}_blacklistfunktions.o  ${SNAME}_auth.o ${LDFLAGS}
 
 ${SNAME}_main.o : ${SNAME}_main.c
 	gcc ${SFLAGS} -c ${SNAME}_main.c
 
 ${SNAME}_list.o : ${SNAME}_list.c
 	gcc ${SFLAGS} -c ${SNAME}_list.c
+
+${SNAME}_blacklistfunktions.o : ${SNAME}_blacklistfunktions.c
+	gcc ${SFLAGS} -c ${SNAME}_blacklistfunktions.c
 
 ${SNAME}_auth.o : ${SNAME}_auth.c
 	gcc ${SFLAGS} -c ${SNAME}_auth.c ${LDFLAGS}

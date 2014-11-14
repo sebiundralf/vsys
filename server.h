@@ -16,7 +16,7 @@
 #include <ftw.h>
 #include <signal.h>
 #include <ldap.h>
-
+#include <time.h>
 
 #define BUF 1024
 #define MAX_PATH 512
@@ -26,6 +26,17 @@ void s_get(char* dir,  int socket);
 void s_put(char* dir, int socket);
 int server_auth (int socket);
 
+
+
+struct blocked_adress
+{
+    in_addr_t s_addr;
+    time_t t;
+    struct tm timestamp;
+    struct blocked_address *next;
+};
+
+typedef struct blocked_adress blacklist;
 
 
 #endif // SERVER_H_INCLUDED
