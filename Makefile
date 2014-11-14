@@ -22,7 +22,7 @@ ${SNAME}_list.o : ${SNAME}_list.c
 	gcc ${SFLAGS} -c ${SNAME}_list.c
 
 ${SNAME}_auth.o : ${SNAME}_auth.c
-	gcc ${SFLAGS} -c ${SNAME}_auth.c
+	gcc ${SFLAGS} -c ${SNAME}_auth.c ${LDFLAGS}
 
 ${SNAME}_get.o : ${SNAME}_get.c
 	gcc ${SFLAGS} -c ${SNAME}_get.c

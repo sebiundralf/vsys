@@ -1,7 +1,7 @@
 #include "client.h"
 
 
-char *s_gets(char *str, int n);
+
 
 void print_usage()
 {
@@ -119,6 +119,14 @@ int main(int argc, char* argv[])
                 perror("Connect error - no server available");
                 return EXIT_FAILURE;
             }
+        }
+
+
+        if(client_auth(create_socket)){
+
+
+
+
         }
 
         do
