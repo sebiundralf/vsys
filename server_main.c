@@ -9,7 +9,7 @@ int create_socket;
 void checkdir(char* dir);
 
 
-
+blacklist *head = NULL;
 
 
 /* Funktion print_usage() zur Ausgabe der usage Meldung */
@@ -30,6 +30,8 @@ void strgc_handler(int sig)
     }
     if(create_socket)
         close(create_socket);
+
+        /* Clear blacklist() */
 
     printf("\n\n...Server wurde beendet.\n");
     _exit(0);
@@ -135,6 +137,13 @@ int main(int argc, char* argv[])
             printf("Waiting for connections...\n");
             new_socket0 = accept ( create_socket, (struct sockaddr *) &cliaddress, &addrlen );
 
+                /* check_ip()
+
+
+
+                */
+
+
 
             process = fork();
             if (process == -1)
@@ -162,12 +171,31 @@ int main(int argc, char* argv[])
 
 
 
-                    if(server_auth(new_socket)){
-                        perror("Client auth fail.\n");
-                        _exit(1);
+                    int i = 0;
+                    int fails = 0;
 
+                    do{
+                    i = server_auth(new_socket);
+                    if(i == 3)
+                        fails ++;
+
+                    if(i == 4){
+                        printf("Client closed remote socket\n");
+                        exit(0);
 
                     }
+
+                    if(fails==3){
+                        perror("Client auth fail. Blocking Ip..\n");
+
+                        /* block_ip() */
+                        _exit(1);
+
+                    }
+
+
+                    }while(i);
+
                 }
 
                 do

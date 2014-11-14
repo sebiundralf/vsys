@@ -140,9 +140,9 @@ int main(int argc, char* argv[])
                 strcpy(buf2,buffer);
 
                 command = strtok(buf2, " ");
-                file = strtok(NULL, " ");
+                file = strtok(NULL, "\n");
 
-                printf("Command: %s\nFile: %s\nbuf2: %s\n\n",command,file,buf2);
+               // printf("Command: %s\nFile: %s\nbuf2: %s\n\n",command,file,buf2);
 
             }
             // printf("Command = %s\n", command);

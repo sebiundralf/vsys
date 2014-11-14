@@ -149,6 +149,10 @@ void c_get(int socket, char* file)
             memset(buffer,'\0',sizeof(buffer));
 
             printf("sending started...");
+
+            int filesize2 = filesize;
+            int prozent = filesize /100;
+            int i = 1;
             while (filesize>0)
             {
 

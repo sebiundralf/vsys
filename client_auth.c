@@ -1,6 +1,7 @@
 #include "client.h"
 
-int client_auth(int socket) {
+int client_auth(int socket)
+{
 
     char fh_uid[9];
     char fh_pw[21];
@@ -8,6 +9,7 @@ int client_auth(int socket) {
     char buffer[BUF];
     memset(buffer, '\0', sizeof(buffer));
 
+    printf("\nLOGIN\n\n");
 
     printf("Please enter UID (8 Zeichen):\n");
 
@@ -15,39 +17,55 @@ int client_auth(int socket) {
 
     get_password((char *)&fh_pw,20);
 
-/* Send UID
+    /* Send UID */
     strcpy(buffer,fh_uid);
 
-    if(send(socket, msg, strlen (msg), 0)==-1)
-        perror("Error sending stuff");
+    if(write(socket,buffer,BUF)==-1)
+        perror("Error writing stuff");
 
     memset(buffer, '\0', sizeof(buffer));
-*/
 
-    /*
 
-        username ok?
 
-    */
 
-    /* send pw
+    do
+    {
+        if(read(socket,buffer,BUF)==-1)
+            perror("Error reading stuff");
+        if(!strcmp(buffer,"uid error"))
+        {
+            printf("\nUID NOT VALID: %s\n", fh_uid);
+        }
+    }
+    while(strcmp(buffer,"uid ok"));
+    memset(buffer, '\0', sizeof(buffer));
 
+
+    /* send pw */
 
     strcpy(buffer,fh_pw);
-   if(send(socket, msg, strlen (msg), 0)==-1)
-        perror("Error sending stuff");
+    if(write(socket,buffer,BUF)==-1)
+        perror("Error writing stuff");
+
+    memset(buffer, '\0', sizeof(buffer));
 
 
-        */
+    do
+    {
+        if(read(socket,buffer,BUF)==-1)
+            perror("Error reading stuff");
+        if(!strcmp(buffer,"wrong pw"))
+        {
+            printf("PW NOT CORRECT\n");
+            break;
+        }
+    }
+    while(strcmp(buffer,"data ok"));
+    memset(buffer, '\0', sizeof(buffer));
 
-    /*
-
-        password ok?
 
 
-    */
-
-
+    printf("Login ok!\n");
 
 
 
