@@ -23,6 +23,7 @@ void c_list (int socket);
 void c_get(int socket, char* file);
 void c_put(int socket, char* file);
 void get_password(char* pw, int l);
-
+int client_auth(int socket);
+char *s_gets(char *str, int n);
 
 #endif // CLIENT_H_INCLUDED
