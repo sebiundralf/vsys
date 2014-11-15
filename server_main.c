@@ -54,6 +54,14 @@ void sig_handler(int sig)
     add_blacklist_entry(&head, ad.sin_addr);
 
 
+
+}
+
+void hup_handler(int sig){
+
+ pid_t kind1 = wait(NULL);
+ //printf("Kind: %d wurde beendet\n",kind1);
+
 }
 
 int main(int argc, char* argv[])
@@ -63,6 +71,7 @@ int main(int argc, char* argv[])
     int vport = -1; //Portnummer
     (void) signal(SIGINT,strgc_handler);
     (void) signal(SIGTERM,sig_handler);
+     (void) signal(SIGHUP,hup_handler);
 
     if (pipe (fd) < 0)
     {
@@ -217,63 +226,123 @@ int main(int argc, char* argv[])
                         {
                             if(!strcasecmp(buffer, "LIST"))
                             {
-                                printf("List wird ausgeführt\n");
-                                s_list(vdir, new_socket);
+                                if(auth)
+                                {
+                                    strcpy(buffer,"server ready");
+                                    if(write(new_socket,buffer,BUF)==-1)
+                                        perror("Error writing stuff");
+
+                                    memset(buffer,'\0',sizeof(buffer));
+
+                                    printf("List wird ausgeführt\n");
+                                    s_list(vdir, new_socket);
+                                }
+                                else
+                                {
+                                    strcpy(buffer,"log");
+                                    if(write(new_socket,buffer,BUF)==-1)
+                                        perror("Error writing stuff");
+                                    memset(buffer,'\0',sizeof(buffer));
+
+                                }
 
                             }
                             else if(!strcasecmp(buffer, "GET"))
                             {
-                                printf("Get wird ausgeführt\n");
-                                s_get(vdir, new_socket);
+                                if(auth)
+                                {
+                                    strcpy(buffer,"server ready");
+                                    if(write(new_socket,buffer,BUF)==-1)
+                                        perror("Error writing stuff");
+                                    printf("Get wird ausgeführt\n");
+                                    s_get(vdir, new_socket);
+                                }
+                                else
+                                {
+                                    strcpy(buffer,"log");
+                                    if(write(new_socket,buffer,BUF)==-1)
+                                        perror("Error writing stuff");
+                                    memset(buffer,'\0',sizeof(buffer));
+
+                                }
+
+
 
                             }
                             else if(!strcasecmp(buffer, "LOGIN"))
                             {
-                                printf("Login wird ausgeführt\n");
-
-                                int i = 0;
-                                i = server_auth(new_socket, fails);
-                                if(!i)
+                                if(!auth)
                                 {
-                                    printf("Login successful!\nClient ip: %s\n",inet_ntoa (cliaddress.sin_addr));
-                                    auth = 1;
-                                }
-                                if(i == 3)
-                                    fails ++;
+                                    printf("Login wird ausgeführt\n");
 
-                                if(i == 4)
-                                {
-                                    printf("Client closed remote socket\n");
-                                    free(vdir);
-                                    exit(0);
-
-                                }
-
-                                if(fails==3)
-                                {
-                                    perror("Client auth fail. Blocking Ip..\n");
-                                    kill(pid, SIGTERM);
-
-
-                                    memset(buffer,0,sizeof(buffer));
-                                    sprintf(buffer,"%s",inet_ntoa (cliaddress.sin_addr));
-                                    if(write(fd[1],buffer,BUF)==-1)
+                                    strcpy(buffer,"server ready");
+                                    if(write(new_socket,buffer,BUF)==-1)
                                         perror("Error reading stuff");
-                                    close(fd[1]);
 
-                                    memset(buffer,0,sizeof(buffer));
+                                    int i = 0;
+                                    i = server_auth(new_socket, fails);
+                                    if(!i)
+                                    {
+                                        printf("Login successful!\nClient ip: %s\n",inet_ntoa (cliaddress.sin_addr));
+                                        auth = 1;
+                                    }
+                                    if(i == 3)
+                                        fails ++;
 
-                                    _exit(1);
+                                    if(i == 4)
+                                    {
+                                        printf("Client closed remote socket\n");
+
+                                        free(vdir);
+                                        kill(pid, SIGHUP);
+                                        exit(0);
+
+                                    }
+
+                                    if(fails==3)
+                                    {
+                                        perror("Client auth fail. Blocking Ip..\n");
+                                        kill(pid, SIGTERM);
+
+
+
+                                        memset(buffer,0,sizeof(buffer));
+                                        sprintf(buffer,"%s",inet_ntoa (cliaddress.sin_addr));
+                                        if(write(fd[1],buffer,BUF)==-1)
+                                            perror("Error reading stuff");
+                                        close(fd[1]);
+
+                                        memset(buffer,0,sizeof(buffer));
+                                        kill(pid, SIGHUP);
+                                        _exit(1);
+                                    }
                                 }
-
-
+                                else
+                                {
+                                    strcpy(buffer,"log");
+                                    if(write(new_socket,buffer,BUF)==-1)
+                                        perror("Error reading stuff");
+                                }
                             }
                             else if(!strcasecmp(buffer, "PUT"))
                             {
-                                printf("Put wird ausgeführt\n");
-                                s_put(vdir, new_socket);
+                                if(auth)
+                                {
+                                    strcpy(buffer,"server ready");
+                                    if(write(new_socket,buffer,BUF)==-1)
+                                        perror("Error writing stuff");
+                                    memset(buffer,'\0',sizeof(buffer));
 
-
+                                    printf("Put wird ausgeführt\n");
+                                    s_put(vdir, new_socket);
+                                }
+                                else
+                                {
+                                    strcpy(buffer,"log");
+                                    if(write(new_socket,buffer,BUF)==-1)
+                                        perror("Error writing stuff");
+                                    memset(buffer,'\0',sizeof(buffer));
+                                }
                             }
                             else if(!strcasecmp(buffer, "QUIT"))
                             {
@@ -291,6 +360,7 @@ int main(int argc, char* argv[])
                         printf("Client from %s closed remote socket\n",inet_ntoa (cliaddress.sin_addr));
                         free(vdir);
                         close (new_socket);
+                        kill(pid, SIGHUP);
                         _exit(0);
                     }
                     else
@@ -301,6 +371,7 @@ int main(int argc, char* argv[])
                 }
                 while (strcasecmp (buffer, "QUIT")  != 0);
                 close (new_socket);
+                kill(pid, SIGHUP);
                 _exit(0);
 
             }
