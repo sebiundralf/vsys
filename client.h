@@ -24,6 +24,7 @@
    #define clrscr() system("cls")
 #endif
 
+char username[BUF];
 
 void c_list (int socket);
 void c_get(int socket, char* file);
