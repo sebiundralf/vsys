@@ -64,7 +64,7 @@ password.o : password.c
 #Clean all
 
 clean: 
-	rm -f vsys_${SNAME} ${SNAME}_main.o ${SNAME}_list.o ${SNAME}_get.o ${SNAME}_put.o vsys_${CNAME}  ${CNAME}_main.o ${CNAME}_list.o ${CNAME}_get.o ${CNAME}_put.o ${SNAME}_blacklistfunktions.o ${CNAME}_auth.o  ${SNAME}_auth.o
+	rm -f vsys_${SNAME} ${SNAME}_main.o ${SNAME}_list.o ${SNAME}_get.o ${SNAME}_put.o vsys_${CNAME}  ${CNAME}_main.o ${CNAME}_list.o ${CNAME}_get.o ${CNAME}_put.o ${SNAME}_blacklistfunktions.o ${CNAME}_auth.o  ${SNAME}_auth.o password.o
 
 
 #(nicht vergessen neue Datein beim erstellen in das Makefile einzubinden!)
