@@ -113,17 +113,18 @@ int main(int argc, char* argv[])
                         return EXIT_FAILURE;
                     }
 
-                    if(!strncasecmp(buffer,"block",5)){
-                           strtok(buffer, "|");
-                           char* printmsg = strtok(NULL, "|");
-                           printf("\n%s\nShutting down client..\n",printmsg);
-                           close(create_socket);
-                           return EXIT_FAILURE;
+                    if(!strncasecmp(buffer,"block",5))
+                    {
+                        strtok(buffer, "|");
+                        char* printmsg = strtok(NULL, "|");
+                        printf("\n%s\nShutting down client..\n",printmsg);
+                        close(create_socket);
+                        return EXIT_FAILURE;
                     }
                 }
                 while(strcmp(buffer,"win"));
 
-                  printf ("Connection with server (%s) established\nPlease log in first with comand: \"LOGIN\"\n", inet_ntoa (address.sin_addr));
+                printf ("Connection with server (%s) established\nPlease log in first with comand: \"LOGIN\"\n", inet_ntoa (address.sin_addr));
 
             }
             else
@@ -136,6 +137,7 @@ int main(int argc, char* argv[])
 
         do
         {
+            login = 0;
             printf ("Send command: ");
             s_gets(buffer, BUF);
 
@@ -158,19 +160,30 @@ int main(int argc, char* argv[])
             {
                 if(!strcasecmp(command, "LIST"))
                 {
-                    if(login)
+
+
+                    if(send(create_socket, command, strlen (command), 0)==-1)
+                        perror("Error sending stuff");
+
+                    do
+                    {
+                        if(read(create_socket,buffer,BUF)==-1)
+                            perror("Error reading stuff");
+
+                        if(!strcmp(buffer,"log"))
+                        {
+
+                            //   printf("Server refused, login first\n");
+                            login=1;
+                            break;
+
+                        }
+                    }
+                    while(strcmp(buffer,"server ready"));
+
+                    if(!login)
                     {
                         printf("List wird ausgeführt\n\nListe:\n");
-
-                        if(send(create_socket, command, strlen (command), 0)==-1)
-                            perror("Error sending stuff");
-
-                        do
-                        {
-                            if(read(create_socket,buffer,BUF)==-1)
-                                perror("Error reading stuff");
-                        }
-                        while(strcmp(buffer,"server ready"));
 
                         memset(buffer,'\0',sizeof(buffer));
                         {
@@ -198,51 +211,52 @@ int main(int argc, char* argv[])
                         }
                         while (strlen(buffer)!=0);
                         printf("\n");
+
                     }
                     else
                     {
-                        printf("Error in list, you must login first, send command: \"LOGIN\"\n\n");
+                        printf("Error in LIST, you must login first, send command: \"LOGIN\"\n\n");
                     }
 
                 }
                 else if(!strcasecmp(command, "GET"))
                 {
-                    if(login)
-                    {
-                        printf("Get wird ausgeführt\n");
-                        c_get(create_socket, file);
-                    }
-                    else
-                    {
-                        printf("Error in get, you must login first, send command: \"LOGIN\"\n\n");
-                    }
+                    c_get(create_socket, file);
                 }
                 else if(!strcasecmp(command, "PUT"))
                 {
-                    if(login)
-                    {
-                        printf("Put wird ausgeführt\n");
-                        c_put(create_socket, file);
-                    }
-                    else
-                    {
-                        printf("Error in put, you must login first, send command: \"LOGIN\"\n\n");
-                    }
+                    c_put(create_socket, file);
                 }
                 else if(!strcasecmp(command, "LOGIN"))
                 {
                     //printf("Put wird ausgeführt\n");
+
+                    if(send(create_socket, command, strlen (command), 0)==-1)
+                        perror("Error sending stuff");
+
+                    do
+                    {
+                        if(read(create_socket,buffer,BUF)==-1)
+                            perror("Error reading stuff");
+
+                        if(!strcmp(buffer,"log"))
+                        {
+                            login = 1;
+                            break;
+                        }
+                    }
+
+                    while(strcmp(buffer,"server ready"));
                     if(!login)
                     {
-                        if(send(create_socket, command, strlen (command), 0)==-1)
-                            perror("Error sending stuff");
+
                         clrscr();
-                        if(!client_auth(create_socket))
-                            login = 1;
+                        client_auth(create_socket);
+
                     }
                     else
                     {
-                        printf("Already logged in as: %s\nQuit client to log out..\n",username);
+                        printf("Login refused\nAlready logged in as: %s\n\n",username);
                     }
                 }
                 else if(!strcasecmp(command, "QUIT"))

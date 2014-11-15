@@ -11,15 +11,6 @@ void s_list (char* dir, int socket)
     char buffer[BUF];
 
 
-    memset(buffer,'\0',sizeof(buffer));
-    {
-
-        strcpy(buffer,"server ready");
-        if(write(socket,buffer,BUF)==-1)
-            perror("Error writing stuff");
-
-        memset(buffer,'\0',sizeof(buffer));
-    }
     do
     {
         if(read(socket,buffer,BUF)==-1)

@@ -5,14 +5,8 @@
 
 void c_get(int socket, char* file)
 {
+    printf("Get wird ausgeführt\n");
     char buffer[BUF];
-    FILE * fp;
-
-    if(!file)
-    {
-        printf("Error! No filename..\n");
-        return;
-    }
 
     char* msg = "get";
 
@@ -23,11 +17,26 @@ void c_get(int socket, char* file)
     {
         if(read(socket,buffer,BUF)==-1)
             perror("Error reading stuff");
+
+        if(!strcmp(buffer,"log"))
+        {
+            printf("Error in GET, you must login first, send command: \"LOGIN\"\n\n");
+            return;
+        }
     }
 
     while(strcmp(buffer,"server ready"));
 
     printf("%s\n",buffer);
+    FILE * fp;
+
+    if(!file)
+    {
+        printf("Error! No filename..\n");
+        return;
+    }
+
+
     memset(buffer, '\0', sizeof(buffer));
     strcpy(buffer,file);
 
@@ -169,7 +178,7 @@ void c_get(int socket, char* file)
                     progress += rs;
                     i = progress/prozent;
 
-               if(i>i2)
+                    if(i>i2)
                     {
                         clrscr();
                         printf("Downloading %s....\nDownload progress: %2d %%\n",file,i);

@@ -4,7 +4,33 @@
 
 void c_put(int socket, char* file)
 {
+    printf("Put wird ausgeführt\n");
+    char buffer[BUF];
 
+    char* msg = "put";
+
+
+    if(send(socket, msg, strlen (msg), 0)==-1)
+        perror("Error sending stuff");
+
+    do
+    {
+        if(read(socket,buffer,BUF)==-1)
+            perror("Error reading stuff");
+
+        if(!strcmp(buffer,"log"))
+        {
+            printf("Error in PUT, you must login first, send command: \"LOGIN\"\n\n");
+            return;
+
+        }
+    }
+
+    while(strcmp(buffer,"server ready"));
+
+    printf("%s\n",buffer);
+
+    memset(buffer, '\0', sizeof(buffer));
     if(!file)
     {
         printf("Error! No filename..\n");
@@ -14,7 +40,7 @@ void c_put(int socket, char* file)
     DIR *dir;
     char path[MAX_PATH];
     char path2[MAX_PATH];
-    char buffer[BUF];
+
     FILE * fp;
 
     if(getcwd(path, MAX_PATH)==NULL)
@@ -47,23 +73,6 @@ void c_put(int socket, char* file)
 
     }
 
-    char* msg = "put";
-
-
-    if(send(socket, msg, strlen (msg), 0)==-1)
-        perror("Error sending stuff");
-
-    do
-    {
-        if(read(socket,buffer,BUF)==-1)
-            perror("Error reading stuff");
-    }
-
-    while(strcmp(buffer,"server ready"));
-
-    printf("%s\n",buffer);
-
- memset(buffer, '\0', sizeof(buffer));
     /* PUT BEGINNT */
 
 
@@ -91,7 +100,7 @@ void c_put(int socket, char* file)
 
     while(strcmp(buffer,"size ok"));
 
-     memset(buffer, '\0', sizeof(buffer));
+    memset(buffer, '\0', sizeof(buffer));
 
 
     int block_sz;
@@ -102,7 +111,7 @@ void c_put(int socket, char* file)
 
 
     while(!feof(fp))
-    /* File übertragen */
+        /* File übertragen */
     {
         if(!fname_sent) //Name senden
         {

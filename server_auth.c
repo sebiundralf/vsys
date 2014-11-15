@@ -7,8 +7,8 @@
 #define SEARCHBASE "dc=technikum-wien,dc=at"
 #define SCOPE LDAP_SCOPE_SUBTREE
 #define FILTER "(uid=if13b067)"
-#define BIND_USER NULL //"uid=if13b067,ou=People,dc=technikum-wien,dc=at"	/* anonymous bind with user and pw NULL */
-#define BIND_PW NULL
+#define BIND_USER "uid=if13b067,ou=People,dc=technikum-wien,dc=at"	/* anonymous bind with user and pw NULL */
+#define BIND_PW "asdf12"
 
 /*
 

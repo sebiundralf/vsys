@@ -80,7 +80,7 @@ int client_auth(int socket)
 
             }
 
-            printf("PW NOT CORRECT, %d trys left\nPlease try again..\n",trysleft);
+            printf("PW NOT CORRECT, %d try(s) left\nPlease try again..\n",trysleft);
             return 3;
         }
     }

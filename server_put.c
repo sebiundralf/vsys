@@ -5,14 +5,7 @@ void s_put(char* dir, int socket)
     /* Verbindungsaufbau */
     char buffer[BUF];
     memset(buffer,'\0',sizeof(buffer));
-    {
 
-        strcpy(buffer,"server ready");
-        if(write(socket,buffer,BUF)==-1)
-            perror("Error writing stuff");
-
-        memset(buffer,'\0',sizeof(buffer));
-    }
 
     /* Put beginnt */
 
@@ -79,7 +72,7 @@ void s_put(char* dir, int socket)
             strcat(path,"/");
 
         strcat(path,file_name);
-        printf("Filename + path: %s\n", path);
+       // printf("Filename + path: %s\n", path);
 
 
 
@@ -155,7 +148,7 @@ void s_put(char* dir, int socket)
                     ws = fwrite(buffer, 1,rs,fp);
                     memset(buffer,'\0',sizeof(buffer));
 
-                    printf("rs: %d\n", rs);
+                 //   printf("rs: %d\n", rs);
 
 
                     if(rs != ws)
