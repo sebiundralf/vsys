@@ -121,6 +121,8 @@ void s_get(char* dir, int socket)
 
     printf("start sending..\n");
 
+
+
     while(!feof(fp))
         /* File übertragen */
     {
@@ -144,7 +146,7 @@ void s_get(char* dir, int socket)
         }
 
         while(status<0);
-        printf("Block %d sent\n", counter);
+      //  printf("Block %d sent\n", counter);
         counter++;
         errorf=0;
         //break;

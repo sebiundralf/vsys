@@ -1,14 +1,12 @@
 #include "client.h"
 
 
+
+
 void c_get(int socket, char* file)
 {
-
-
-
     char buffer[BUF];
     FILE * fp;
-
 
     if(!file)
     {
@@ -16,9 +14,7 @@ void c_get(int socket, char* file)
         return;
     }
 
-
     char* msg = "get";
-
 
     if(send(socket, msg, strlen (msg), 0)==-1)
         perror("Error sending stuff");
@@ -32,8 +28,6 @@ void c_get(int socket, char* file)
     while(strcmp(buffer,"server ready"));
 
     printf("%s\n",buffer);
-
-
     memset(buffer, '\0', sizeof(buffer));
     strcpy(buffer,file);
 
@@ -51,8 +45,6 @@ void c_get(int socket, char* file)
 
     printf("Filename sent\n");
 
-
-
     memset(buffer, '\0', sizeof(buffer));
     do
     {
@@ -68,11 +60,6 @@ void c_get(int socket, char* file)
 
     }
     while(strcmp(buffer,"start"));
-
-
-
-
-
     {
         int fsize, statt;
         int rs; //reading size
@@ -85,24 +72,10 @@ void c_get(int socket, char* file)
 
         printf("Filesize recived: %d bytes\n", fsize);
 
-
-
-
-
-        //if(strncmp(buffer,"Sending file failed",18) == 0)
-        //  printf("%s \n",buffer);
-
-        //else
-
-
-
         int filesize = fsize;
         // int fsizemsg = fsize;
         fsize = 0;
         memset(buffer,'\0',sizeof(buffer));
-
-
-
 
         char path[MAX_PATH];
 
@@ -150,9 +123,16 @@ void c_get(int socket, char* file)
 
             printf("sending started...");
 
-            int filesize2 = filesize;
+
             int prozent = filesize /100;
-            int i = 1;
+
+            int progress = 0;
+            int i = progress/prozent;
+            int i2 = 0;
+
+            printf("Downloading %s....\nDownload progress: %2d %%\n",file,i);
+            i2 = i;
+
             while (filesize>0)
             {
 
@@ -180,14 +160,22 @@ void c_get(int socket, char* file)
                     }
                     while(rs<0);
 
-
-                    //    memset(buffer,'\0',sizeof(buffer));
-                    // fsize = recv(socket,buffer,BUF,0);
-
                     ws = fwrite(buffer, 1,rs,fp);
                     memset(buffer,'\0',sizeof(buffer));
 
-                    printf("rs: %d\n", rs);
+                    //printf("rs: %d\n", rs);
+
+
+                    progress += rs;
+                    i = progress/prozent;
+
+               if(i>i2)
+                    {
+                        clrscr();
+                        printf("Downloading %s....\nDownload progress: %2d %%\n",file,i);
+                    }
+
+                    i2 = i;
 
 
                     if(rs != ws)
