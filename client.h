@@ -17,6 +17,12 @@
 #define BUF 1024
 #define MAX_PATH 512
 
+#ifdef  __unix__
+   #define clrscr() printf("\x1B[2J")
+#else
+   #include <stdlib.h>
+   #define clrscr() system("cls")
+#endif
 
 
 void c_list (int socket);
