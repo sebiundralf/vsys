@@ -18,6 +18,8 @@ void clear_list(blacklist *head) //löscht alle einträge
         head = current;
         
     }
+    free(head);
+    
     return;
 }
 
