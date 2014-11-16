@@ -1,0 +1,199 @@
+
+Vsys Server & Client für Uploads, und Downloads mit LDAP-Authentifizierung über Sockets
+
+
+Kurzer Überblick
+
+1.	Server wird mit den Optionen –d für das Downloadverzeichnis und –p für die Portnummer gestartet
+2.	Server überprüft ob das Downloadverzeichnis gültig ist
+3.	Server erzeugt ein Socket und wartet auf einen Client
+4.	Client wird mit den Optionen –i für die IP des Servers und –p für die Portnummer gestartet
+5.	Client erzeugt ein Socket und verbindet sich mit dem Server
+6.	Server hat nun 3 Antwortmöglichkeiten:
+a.	Block: Client-IP wird vom Server geblockt, der Server schickt außerdem die Fehlermeldung incl. Zeit bis zur Aufhebung der Blockade mit
+b.	Fail: Server kann keinen Kindprozess für die Clientbehandlung erzeugen. Clientanwendung wird beendet
+c.	Win: Server akzeptiert den Client und kommuniziert weiter mit ihm über einen Kindprozess
+7.	Elternprozess des Servers wartet auf weitere anfragen
+8.	Kindprozess des Servers verweigert LIST, GET und PUT bevor kein Login erfolgt ist
+9.	Login
+a.	Server verbindet sich anonym mit LDAP
+b.	Server überprüft UID
+c.	Server überprüft Passwort
+10.	Wenn 3 Mal ein falsches Passwort bei gültiger UID (muss nicht dieselbe sein) eingegeben wurde wird der Client und seine IP geblockt. Die Login Versuche werden auf dem Server notiert
+11.	Client kann nun LIST, GET und PUT ausführen
+12.	Der Client wird mit dem QUIT Befehl beendet
+13.	Der Server wird mit SIGINT Signal beendet (STRG + C)
+
+
+
+ 
+VSYS Server
+
+Funktionen
+
+
+
+-	Main
+
+int main(int argc, char* argv[]);
+
+	Main Funkion, verlangt die oben erwähnten optionen –d für Downloadverzeichnis und –p für Portnummer. Erzeugt für jeden verbundenen Client einen Kindprozess, der dann mit diesem Kommuniziert. Der Elternprozess wartet grundsätzlich auf Clientanfragen und verarbeitet asynchron Signale die von den Kinprozessen oder dem USER geschickt werden.
+
+
+
+
+-	Signalbearbeitung
+
+void strgc_handler(int sig);
+
+	Verarbeitet das SIGINT Signal. Dient  zum beenden des Servers. Allocierte Variablen werden freigegeben, Das socket geschlossen und die Blacklist gelöscht. Eine Meldung wird ausgegeben und der Server geschlossen.
+
+
+
+void hup_handler(int sig);
+
+	Verarbeitet das SIGUP Signal. Dient zum beenden von Kindprozessen und verhindert die Entstehung von Zombieprozessen. Bevor ein Kindprozess beendet wird, schickt dieser an den Elternprozess ein SIGHUP Signal, der darauf mit wait(NULL), den Kindprozess nach seiner Beendigung löscht. 
+
+
+
+void sig_handler(int sig);
+
+	Verarbeitet das SIGTERM Signal. Dient dazu, einen Client in die Blacklist einzutragen. Kindprozess der den zu blockierenden Client behandelt schickt ein SIGTERMSIGNAL an den Elternprozess. Dieser Bekommt vom Kindprozess dann über eine unnamed pipe die IP-Adresse des zu blockierenden Clients. Der Client wird dann mit der Funktion add_blacklist_entry() in die Blacklist eingetragen.
+
+
+
+
+-	Clientbefehle
+
+void s_list (char* dir, int socket);
+
+	Server schickt Client die Liste der Dateien und deren Größe die im Downloadverzeichnis liegen.
+
+
+
+void s_get(char* dir,  int socket);
+
+	Downloadverzeichns und Socket werden übergeben. Server schickt Client eine Datei.
+
+
+
+void s_put(char* dir, int socket);
+
+	Downloadverzeichns und Socket werden übergeben. Server schickt Client eine Datei.
+
+
+
+-	LDAP Authentifizierung
+
+int server_auth (int socket, int fails);
+
+	Socket und die Anzahl der falschen Passworteingaben werden übergeben. Führt die Anmeldung über LDAP durch und sendet dem Clientuser bei erfolgreicher Anmeldung Vor- und Nachnamen.
+
+Rückgabewerte:
+1.	0 = Anmeldung erfolgreich
+2.	1 = Anmeldung wegen sonstigem Fehler fehlgeschlagen
+3.	2 = Ungültige UID
+4.	3 = Falsches Passwort
+5.	4 = Client wurde während dem ausführen beendet
+
+Ablauf: 
+1.	Verbinden mit LDAP
+2.	Client schickt Server die UID
+3.	Anonyme Anmeldung bei LDAP Server
+4.	Suche nach der UID
+5.	Wenn genau 1 UID gefunden wurde wird diese Bestätigt
+6.	Der zugehörige Name zur UID wird über LDAP abgefragt
+7.	Client schickt Server das Passwort
+8.	Erneute Anmeldung bei LDAP mit den Daten des Clients
+9.	Schlägt diese fehl schickt der Server dem Client eine Fehlermeldung mit der Anzahl der bereits fehlgeschlagenen Anmeldungen
+10.	Ist die Anmeldung erfolgreich schickt der Server dem Client noch den Namen
+
+
+
+-	Blacklist Funktionen
+
+
+
+void clear_list(blacklist *head);
+
+	Löscht alle einträge aus der Blacklist und Gibt den Speicher frei. Pointer auf den head der Blacklist wird übergeben.
+
+
+
+void add_blacklist_entry(blacklist**head, struct in_addr ip);
+
+	Trägt die zu sperrende IP mit der aktuellen Zeit  in die Blacklist ein. Adresse des Headpointer und die zu sperrende IP werden übergeben.
+
+
+
+int check_blacklist(blacklist**head, struct in_addr ip);
+
+	Überprüft ob abgelaufene Sperren in der Blacklist sind und löscht diese gegebenenfalls.
+Überprüft danach ob die IP des zu verbindenden Clients gesperrt ist. Adresse des Headpointers und die IP des zu verbindenden Clients werden übergeben. Liefert 0 zurück wenn die IP nicht gesperrt ist. Wenn die IP gesperrt ist wird die Zeit in Sekunden bis zum Ablauf der Sperre zurückgeliefert.
+
+
+
+
+-	Sonstige
+
+void checkdir(char* dir);
+
+	Überprüft ob ein gültiges Downloadverzeichnis angegeben wurde.
+
+
+
+ 
+VSYS CLIENT
+
+Funktionen
+
+
+-	Main
+int main(int argc, char* argv[]):
+
+	Die Main wird mit –i für die IP des servers und –p für die Portnummer gestartet. Die Main bearbeitet die eingaben des Users und verarbeitet die Antworten des Servers. 
+
+
+
+
+-	Clientbefehle
+
+void c_list (int socket);
+
+	Ist in der Main integriert. Client Schickt Listanfrage an den Server. Ist der Client authentifiziert schickt der Server dem Client die Dateiliste die der Client am Bildschirm ausgibt.
+
+
+
+void c_get(int socket, char* file);
+
+	Socket und Filename werden übergeben. Server schickt Client die gewünschte Datei. Der Fortschritt des Downloads wird mit einer % Anzeige beim Client angezeigt. Die Datei wird in einzelne Pakete aufgeteilt mit der Größe die über das define BUF festgelegt ist.
+
+
+
+void c_put(int socket, char* file);
+
+	Socket und Filename werden übergeben. Der Client kopiert eine Datei auf den Server.
+
+
+
+-	Authentifizierung
+
+int client_auth(int socket);
+
+	Socket wird übergeben. Der Client verlangt nach UID und Passwort. Bei erfolgreicher Authentifizierung wird eine Willkommensmeldung mit dem Namen des Users angezeigt.
+
+
+
+void get_password(char* pw, int l);
+
+	Dient zum Maskieren des Passworts. Es werden „*“ statt die eingegebenen Zeichen angezeigt. Übergabeparameter sind die Adresse eines Chararray zum Speichern des Passworts und die länge minus 1 des Arrays. 
+
+
+
+
+-	Sonstige
+
+char *s_gets(char *str, int n);
+
+	Funktion für Usereingaben. Ein String und die Maxlänge der Eingabe werden übergeben. Die Funktion speichert alle eingebenen Zeichen bis zur Maxlänge in den String und fängt alle weiteren Zeichen ab, so dass keine Zeichen mehr im Buffer sind. 
+
