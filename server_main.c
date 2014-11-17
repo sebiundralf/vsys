@@ -12,6 +12,7 @@ void checkdir(char* dir);
 blacklist *head = NULL;
 
 int fd[2];
+
 /* Funktion print_usage() zur Ausgabe der usage Meldung */
 void print_usage()
 {
