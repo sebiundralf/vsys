@@ -7,6 +7,7 @@ CNAME = client
 SFLAGS = -g -Wall -O -std=c99 -pedantic -D_BSD_SOURCE 
 LDFLAGS = -DLDAP_DEPRECATED -lldap -llber 
 CFLAGS = ${SFLAGS}
+DIST = vsys_Bogensperger-Andel
 
 all : ${SNAME} ${CNAME}
 
@@ -65,6 +66,20 @@ password.o : password.c
 
 clean: 
 	rm -f vsys_${SNAME} ${SNAME}_main.o ${SNAME}_list.o ${SNAME}_get.o ${SNAME}_put.o vsys_${CNAME}  ${CNAME}_main.o ${CNAME}_list.o ${CNAME}_get.o ${CNAME}_put.o ${SNAME}_blacklistfunktions.o ${CNAME}_auth.o  ${SNAME}_auth.o password.o
+
+# Dist und Distclean
+
+
+dist:	
+	rm -f -r $(DIST)
+	mkdir $(DIST)
+	cp ${CNAME}_main.c ${CNAME}.h ${CNAME}_auth.c ${CNAME}_get.c ${CNAME}_list.c ${CNAME}_put.c password.c Dokumentation ${SNAME}_main.c ${SNAME}_auth.c ${SNAME}.h ${SNAME}_blacklistfunktions.c ${SNAME}_get.c ${SNAME}_list.c ${SNAME}_put.c Makefile $(DIST)
+	tar cvfz $(DIST).tar.gz $(DIST)
+
+
+distclean: 
+	rm -f -r $(DIST)
+	rm -f $(DIST).tar.gz
 
 
 #(nicht vergessen neue Datein beim erstellen in das Makefile einzubinden!)
