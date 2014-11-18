@@ -4,7 +4,7 @@
 #define PATH_MAX 255
 #endif
 
-char* vdir = NULL; //Verzeichnispfad, muss später freigegeben werden
+char* vdir = NULL; //Verzeichnispfad, muss später freigegeben werden 
 int create_socket;
 void checkdir(char* dir);
 
