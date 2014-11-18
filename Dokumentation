@@ -44,9 +44,9 @@ Kurzer Überblick
 7.	Elternprozess des Servers wartet auf weitere anfragen
 8.	Kindprozess des Servers verweigert LIST, GET und PUT bevor kein Login erfolgt ist
 9.	Login
-a.	Server verbindet sich anonym mit LDAP
-b.	Server überprüft UID
-c.	Server überprüft Passwort
+	a.	Server verbindet sich anonym mit LDAP
+	b.	Server überprüft UID
+	c.	Server überprüft Passwort
 10.	Wenn 3 Mal ein falsches Passwort bei gültiger UID (muss nicht dieselbe sein) eingegeben wurde wird der Client und seine IP geblockt. Die Login Versuche werden auf dem Server notiert
 11.	Client kann nun LIST, GET und PUT ausführen
 12.	Der Client wird mit dem QUIT Befehl beendet, der Kindprozess des Servers schickt dem Elternprozess ein SIGHUP signal um den Kindprozess mit wait(); zu löschen
