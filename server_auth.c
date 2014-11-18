@@ -71,6 +71,7 @@ int server_auth (int socket, int fails)
     if (rc != LDAP_SUCCESS)
     {
         fprintf(stderr,"LDAP error: %s\n",ldap_err2string(rc));
+
         ldap_unbind(ld);
         return EXIT_FAILURE;
     }

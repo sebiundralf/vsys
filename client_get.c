@@ -134,9 +134,12 @@ void c_get(int socket, char* file)
 
 
             int prozent = filesize /100;
+            long filesize2 = filesize;
 
             int progress = 0;
-            int i = progress/prozent;
+            int i = 0;
+            if(prozent)
+                i = progress/prozent;
             int i2 = 0;
 
             printf("Downloading %s....\nDownload progress: %2d %%\n",file,i);
@@ -176,7 +179,11 @@ void c_get(int socket, char* file)
 
 
                     progress += rs;
-                    i = progress/prozent;
+
+                    if(progress==filesize2)
+                        i = 100;
+                    else
+                        i = progress/prozent;
 
                     if(i>i2)
                     {

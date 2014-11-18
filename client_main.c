@@ -221,7 +221,10 @@ int main(int argc, char* argv[])
                 }
                 else if(!strcasecmp(command, "GET"))
                 {
-                    c_get(create_socket, file);
+                   if(strstr(file, ".."))
+                        printf("Wrong filename, filename must not contain \"..\"\n");
+                    else
+                        c_get(create_socket, file);
                 }
                 else if(!strcasecmp(command, "PUT"))
                 {
